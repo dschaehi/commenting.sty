@@ -61,13 +61,13 @@ This entire paragraph needs revision.
 
 Available colorblind-safe colors:
 
-| Color Name | Description    | RGB Values     | Usage              |
-|------------+---------------+---------------+-------------------|
-| cbBlue     | Strong blue   | (51,114,189)  | Primary emphasis   |
-| cbOrange   | Vivid orange  | (255,127,42)  | Secondary emphasis |
-| cbTeal     | Bright teal   | (64,204,204)  | Tertiary emphasis |
-| cbRed      | Clear red     | (217,37,37)   | Important notes   |
-| cbPurple   | Muted purple  | (148,103,189) | Additional comments|
+| Color Name | Description  | RGB Values    |
+|------------+--------------+---------------|
+| cbBlue     | Strong blue  | (51,114,189)  |
+| cbOrange   | Vivid orange | (255,127,42)  |
+| cbTeal     | Bright teal  | (64,204,204)  |
+| cbRed      | Clear red    | (217,37,37)   |
+| cbPurple   | Muted purple | (148,103,189) |
 
 * Package Options
 
