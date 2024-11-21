@@ -70,7 +70,8 @@
 \RequirePackage[ruled,perpage]{manyfoot} % For multiple footnote styles
 \RequirePackage{xcolor}               % For colored text
 \RequirePackage{hyperref}             % For hyperlinks
-\hypersetup{draft=false}
+\AtEndPreamble{\hypersetup{draft=false}}
+
 
 % Colorblind-safe color palette
 % These colors are chosen for maximum distinguishability for all types of color vision
