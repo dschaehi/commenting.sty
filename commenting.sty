@@ -133,7 +133,7 @@
 % Creates: authorinline, authorfootnote, authoradd commands and authorenv environment
 \newcommand{\registerauthor}[2]{%
     \expandafter\definecolor{color#1}{named}{#2}%
-    \expandafter\newcommand\csname #1inline\endcsname[1]{{\inlinecomment{#1}{color#1}{##1}}}
+    \expandafter\newcommand\csname #1inline\endcsname[1]{\inlinecomment{#1}{color#1}{##1}}
     \expandafter\newcommand\csname #1footnote\endcsname[1]{\footnotecomment{#1}{color#1}{##1}}
     \expandafter\newcommand\csname #1add\endcsname[1]{\added{#1}{color#1}{##1}}
     \expandafter\newenvironment{#1env}{\begin{colored}{color#1}{#1}}{\end{colored}}%
