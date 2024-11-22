@@ -6,6 +6,8 @@
 
 A LaTeX package for collaborative academic writing with sophisticated comment management and tracking features. Designed with accessibility in mind, featuring colorblind-safe colors for better collaboration.
 
+[[file:example.png]]
+
 * Features
 
 - Color-coded inline comments with author attribution
@@ -84,8 +86,6 @@ This entire paragraph needs revision.
 
 \end{document}
 #+end_src
-
-[[file:example.png]]
 
 * Color Documentation
 
