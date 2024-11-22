@@ -6,7 +6,7 @@
 
 A LaTeX package for collaborative academic writing with sophisticated comment management and tracking features. Designed with accessibility in mind, featuring colorblind-safe colors for better collaboration.
 
-[[file:example.png]]
+[[file:examples.png]]
 
 * Features
 
@@ -50,12 +50,12 @@ Each registered author gets access to these commands:
 ** Example Usage
 
 #+begin_src latex
-This is a \aliceinline{needs clarification} paragraph.
+This is a paragraph. \aliceinline{needs clarification}
+
 Here's a statement\bobfootnote{Add citation}.
-This is \aliceadd{very} important.
 
 \begin{bobenv}
-This entire paragraph needs revision.
+    This is \aliceadd{very} important.
 \end{bobenv}
 #+end_src
 
@@ -76,12 +76,12 @@ This entire paragraph needs revision.
 
 \section{Introduction}
 
-This is a \aliceinline{needs clarification} paragraph.
+This is a paragraph. \aliceinline{needs clarification}
+
 Here's a statement\bobfootnote{Add citation}.
-This is \aliceadd{very} important.
 
 \begin{bobenv}
-This entire paragraph needs revision.
+    This is \aliceadd{very} important.
 \end{bobenv}
 
 \end{document}
