@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % commenting.sty (https://github.com/dschaehi/commenting.sty)
-% 
+%
 % A LaTeX package for collaborative academic writing with sophisticated comment
 % management and tracking features. This package facilitates:
 %
@@ -26,7 +26,7 @@
 % Example:
 %   \registerauthor{alice}{cbBlue}    % Using colorblind-safe blue
 %   \registerauthor{bob}{cbOrange}    % Using colorblind-safe orange
-%   
+%
 %   \aliceinline{Suggest rephrasing this section}
 %   \bobfootnote{Citation needed here}
 %   This is \aliceadd{important} text.
@@ -92,40 +92,40 @@
 % Command for footnote-style comments
 % Args: #1=author identifier, #2=color, #3=comment text
 \newcommand{\footnotecomment}[3]{%
-    \ifthenelse{\boolean{isDraft}}%
-    {\protect{\color{#2}\footnoteA{\color{#2}\guillemotright#3\guillemotleft\signature{#1}}}}%
-    {}
+	\ifthenelse{\boolean{isDraft}}%
+	{\protect{\color{#2}\footnoteA{\color{#2}\guillemotright#3\guillemotleft\signature{#1}}}}%
+	{}
 }
 
 % Command for inline comments
 % Args: #1=author identifier, #2=color, #3=comment text
 \newcommand{\inlinecomment}[3]{%
-    \ifthenelse{\boolean{isDraft}}%
-    {{\noindent\small\leavevmode\color{#2}\guillemotright#3\guillemotleft\signature{#1}}}%
-    {}
+	\ifthenelse{\boolean{isDraft}}%
+	{{\noindent\small\leavevmode\color{#2}\guillemotright#3\guillemotleft\signature{#1}}}%
+	{}
 }
 
 % Command for added text with author attribution
 % Args: #1=author identifier, #2=color, #3=added text
 \newcommand{\added}[3]{{%
-            \ifthenelse{\boolean{isDraft}}
-            {\leavevmode\color{#2}#3\signature{#1}}
-            {#3}}%
+			\ifthenelse{\boolean{isDraft}}
+			{\leavevmode\color{#2}#3\signature{#1}}
+			{#3}}%
 }
 
 % Environment for colored text blocks with margin notes
 % Args: #1=color, #2=author identifier
 \newenvironment{colored}[2]
-{\ifvmode\vspace{-\baselineskip}\fi\ifthenelse{\boolean{isDraft}}{\color{#1}\marginpar{\vspace*{\baselineskip}\signature{#2}}}{}}
+{\ifhmode\par\fi\ifthenelse{\boolean{isDraft}}{\color{#1}\marginpar{\vspace*{\baselineskip}\signature{#2}}}{}}
 {\ifthenelse{\boolean{isDraft}}{}{}}
 
 % Register a new author with associated commands
 % Args: #1=author identifier, #2=color name
 % Creates: authorinline, authorfootnote, authoradd commands and authorenv environment
 \newcommand{\registerauthor}[2]{%
-    \expandafter\definecolor{color#1}{named}{#2}%
-    \expandafter\newcommand\csname #1inline\endcsname[1]{\inlinecomment{#1}{color#1}{##1}}
-    \expandafter\newcommand\csname #1footnote\endcsname[1]{\footnotecomment{#1}{color#1}{##1}}
-    \expandafter\newcommand\csname #1add\endcsname[1]{\added{#1}{color#1}{##1}}
-    \expandafter\newenvironment{#1env}{\begin{colored}{color#1}{#1}}{\end{colored}}%
+	\expandafter\definecolor{color#1}{named}{#2}%
+	\expandafter\newcommand\csname #1inline\endcsname[1]{\inlinecomment{#1}{color#1}{##1}}
+	\expandafter\newcommand\csname #1footnote\endcsname[1]{\footnotecomment{#1}{color#1}{##1}}
+	\expandafter\newcommand\csname #1add\endcsname[1]{\added{#1}{color#1}{##1}}
+	\expandafter\newenvironment{#1env}{\begin{colored}{color#1}{#1}}{\end{colored}}%
 }
