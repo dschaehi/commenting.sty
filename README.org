@@ -68,6 +68,11 @@ Available colorblind-safe colors:
 | cbTeal     | Bright teal  | (64,204,204)  |
 | cbRed      | Clear red    | (217,37,37)   |
 | cbPurple   | Muted purple | (148,103,189) |
+| cbGreen    | Bright green | (0,158,115)   |
+| cbYellow   | Vivid yellow | (240,228,66)  |
+| cbPink     | Soft pink    | (204,121,167) |
+| cbBrown    | Warm brown   | (146,73,0)    |
+| cbGray     | Neutral gray | (128,128,128) |
 
 * Package Options
 
