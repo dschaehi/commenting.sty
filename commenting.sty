@@ -76,7 +76,6 @@
 \RequirePackage{xcolor}               % For colored text
 \RequirePackage{hyperref}             % For hyperlinks
 \AtEndPreamble{\hypersetup{draft=false}} % Disable hyperref draft mode
-\usepackage{xspace}
 
 % Colorblind-safe color palette
 % These colors are chosen for maximum distinguishability for all types of color vision
@@ -103,7 +102,7 @@
 % Args: #1=author identifier, #2=color, #3=comment text
 \newcommand{\footnotecomment}[3]{%
     \ifthenelse{\boolean{isDraft}}%
-    {\protect{\color{#2}\footnoteA{\color{#2}\guillemotright#3\guillemotleft\signature{#1}}\ignorespaces}}%
+    {\protect{\color{#2}\footnoteA{\color{#2}\guillemotright#3\guillemotleft\signature{#1}}}}%
     {}%
 }
 
@@ -111,7 +110,7 @@
 % Args: #1=author identifier, #2=color, #3=comment text
 \newcommand{\inlinecomment}[3]{%
     \ifthenelse{\boolean{isDraft}}%
-    {{\noindent\small\leavevmode\color{#2}\guillemotright#3\guillemotleft\signature{#1}\ignorespaces}}%
+    {{\noindent\small\leavevmode\color{#2}\guillemotright#3\guillemotleft\signature{#1}}}%
     {\unskip}%
 }
 
