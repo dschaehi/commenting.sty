@@ -103,16 +103,16 @@
 % Args: #1=author identifier, #2=color, #3=comment text
 \newcommand{\footnotecomment}[3]{%
     \ifthenelse{\boolean{isDraft}}%
-    {\protect{\color{#2}\footnoteA{\color{#2}\guillemotright#3\guillemotleft\signature{#1}}\xspace}}%
-    {}
+    {\protect{\color{#2}\footnoteA{\color{#2}\guillemotright#3\guillemotleft\signature{#1}}\ignorespaces}}%
+    {}%
 }
 
 % Command for inline comments
 % Args: #1=author identifier, #2=color, #3=comment text
 \newcommand{\inlinecomment}[3]{%
     \ifthenelse{\boolean{isDraft}}%
-    {{\noindent\small\leavevmode\color{#2}\guillemotright#3\guillemotleft\signature{#1}\xspace}}%
-    {}
+    {{\noindent\small\leavevmode\color{#2}\guillemotright#3\guillemotleft\signature{#1}\ignorespaces}}%
+    {\unskip}%
 }
 
 % Command for added text with author attribution
@@ -134,7 +134,7 @@
 % Creates: authorinline, authorfootnote, authoradd commands and authorenv environment
 \newcommand{\registerauthor}[2]{%
     \expandafter\definecolor{color#1}{named}{#2}%
-    \expandafter\newcommand\csname #1inline\endcsname[1]{\inlinecomment{#1}{color#1}{##1}}
+    \expandafter\newcommand\csname #1inline\endcsname[1]{{\inlinecomment{#1}{color#1}{##1}}}
     \expandafter\newcommand\csname #1footnote\endcsname[1]{\footnotecomment{#1}{color#1}{##1}}
     \expandafter\newcommand\csname #1add\endcsname[1]{\added{#1}{color#1}{##1}}
     \expandafter\newenvironment{#1env}{\begin{colored}{color#1}{#1}}{\end{colored}}%
