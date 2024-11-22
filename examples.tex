@@ -1,0 +1,23 @@
+\documentclass{article}
+\usepackage[final]{commenting}
+
+\registerauthor{alice}{cbBlue}    % Register Alice with blue color
+\registerauthor{bob}{cbOrange}    % Register Bob with orange color
+
+\title{\texttt{commenting.sty} examples}
+\date{}
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+This is a \aliceinline{needs clarification} paragraph.
+Here's a statement\bobfootnote{Add citation}.
+This is \aliceadd{very} important.
+
+\begin{bobenv}
+This entire paragraph needs revision.
+\end{bobenv}
+
+\end{document}
