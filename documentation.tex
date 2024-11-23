@@ -1,0 +1,111 @@
+\documentclass{article}
+\usepackage[draft]{commenting}
+\usepackage{lipsum}  % For demo text
+
+% Register reviewers with different roles
+\registerauthor{alice}{cbBlue}      % Technical editor
+\registerauthor{bob}{cbOrange}      % Content reviewer
+\registerauthor{carol}{cbTeal}      % Copy editor
+\registerauthor{dave}{cbPurple}     % Format checker
+
+\title{Using \texttt{commenting.sty} for Document Review}
+\author{Documentation Team}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Package Overview}
+The \texttt{commenting.sty} package provides a comprehensive solution for collaborative document 
+review in LaTeX\bobfootnote{Add package version number}. It supports multiple reviewers, each 
+with their own color-coded comments\aliceadd{, ensuring clear attribution of feedback}.
+
+\section{Comment Types}
+The package offers four main types of review annotations:
+
+\begin{enumerate}
+    \item \textbf{Inline Comments:} Quick marginal notes that appear directly in 
+    the text\daveinline{Like this inline comment}
+    
+    \item \textbf{Footnote Comments:} Detailed observations that appear at the page 
+    bottom\bobfootnote{Footnotes are perfect for longer explanations}
+    
+    \item \textbf{Text Additions:} Track suggested insertions with 
+    \caroladd{highlighted text and reviewer attribution}
+    
+    \item \textbf{Review Environments:} Highlight entire blocks of text that need attention
+\end{enumerate}
+
+\section{Implementation Examples}
+\begin{aliceenv}
+Here's how to implement comments in your document:
+
+1. First register an author with their color:
+   \verb|\registerauthor{<author>}{<color>}|
+
+2. This creates four commands automatically:
+   \begin{itemize}
+       \item \verb|\<author>|\verb|inline{text}| for marginal comments
+       \item \verb|\<author>|\verb|footnote{text}| for footnotes
+       \item \verb|\<author>|\verb|add{text}| for additions
+       \item \verb|\begin{<author>|\verb|env}| environment
+   \end{itemize}
+\end{aliceenv}
+
+\section{Using Review Environments}
+Review environments are perfect for longer comments or marking entire sections that need 
+attention\bobfootnote{Each reviewer's environment uses their assigned color}.
+
+\begin{aliceenv}
+The syntax for environments is:
+
+\begin{verbatim}
+\begin{<author>env}
+    Your content goes here...
+    Can include multiple paragraphs
+    and other LaTeX commands
+\end{<author>env}
+\end{verbatim}
+\end{aliceenv}
+
+\begin{bobenv}
+Environments can contain:
+\begin{itemize}
+    \item Regular text
+    \item Other LaTeX environments
+    \item \caroladd{Nested comments from other reviewers}
+    \item Mathematical equations
+    \item Tables and figures
+\end{itemize}
+\end{bobenv}
+
+\section{Color System}
+The package uses a carefully selected colorblind-safe palette\davefootnote{Based on 
+ColorBrewer scheme}:
+
+\begin{itemize}
+    \item \textcolor{cbBlue}{Blue} and \textcolor{cbOrange}{orange} for primary reviewers
+    \item \textcolor{cbTeal}{Teal} and \textcolor{cbPurple}{purple} for secondary reviewers
+    \item Additional colors available: \textcolor{cbRed}{red}, \textcolor{cbGreen}{green}, 
+    \textcolor{cbPink}{pink}\aliceinline{Add complete color list in documentation}
+\end{itemize}
+
+\section{Usage Guidelines}
+To use the package effectively:
+\begin{enumerate}
+    \item Load the package with \verb|\usepackage[draft]{commenting}|
+    \item Register all reviewers at the document start
+    \item \caroladd{Use consistent comment types for similar feedback}
+    \item Switch to \verb|[final]| option for the publication version
+\end{enumerate}
+
+\section{Advanced Features}
+The package also supports\bobinline{Expand this section} advanced features like:
+\begin{itemize}
+    \item Multiple footnote styles
+    \item Custom color definitions
+    \item \caroladd{Conditional comment visibility}
+    \item Integration with version control
+\end{itemize}
+
+\end{document}

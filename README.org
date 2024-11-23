@@ -6,7 +6,9 @@
 
 A LaTeX package for collaborative academic writing with sophisticated comment management and tracking features. Designed with accessibility in mind, featuring colorblind-safe colors for better collaboration.
 
-[[file:examples.png]]
+[[file:page_1.png]]
+[[file:page_2.png]]
+[[file:page_3.png]]
 
 * Features
 
@@ -32,8 +34,7 @@ A LaTeX package for collaborative academic writing with sophisticated comment ma
 Register authors with their assigned colors:
 
 #+begin_src latex
-\registerauthor{alice}{cbBlue}    % Register Alice with blue color
-\registerauthor{bob}{cbOrange}    % Register Bob with orange color
+\registerauthor{<author>}{<color>}    % Register author with chosen color
 #+end_src
 
 ** Available Commands
