@@ -8,8 +8,8 @@
 \registerauthor{carol}{cbTeal}      % Copy editor
 \registerauthor{dave}{cbPurple}     % Format checker
 
-\title{Using \texttt{commenting.sty} for Document Review}
-\author{Documentation Team}
+\title{Using \texttt{commenting.sty}: An Overview}
+\author{Jae Hee Lee}
 \date{\today}
 
 \begin{document}
@@ -24,7 +24,7 @@ with their own color-coded comments\aliceadd{, ensuring clear attribution of fee
 The package offers four main types of review annotations:
 
 \begin{enumerate}
-    \item \textbf{Inline Comments:} Quick marginal notes that appear directly in 
+    \item \textbf{Inline Comments:} Quick notes that appear directly in 
     the text\daveinline{Like this inline comment}
     
     \item \textbf{Footnote Comments:} Detailed observations that appear at the page 
@@ -33,28 +33,27 @@ The package offers four main types of review annotations:
     \item \textbf{Text Additions:} Track suggested insertions with 
     \caroladd{highlighted text and reviewer attribution}
     
-    \item \textbf{Review Environments:} Highlight entire blocks of text that need attention
+    \item \textbf{Text-Additions Environment:} The environment version of text additions
 \end{enumerate}
 
 \section{Implementation Examples}
 \begin{aliceenv}
 Here's how to implement comments in your document:
 
-1. First register an author with their color:
+1. Register an author with color:
    \verb|\registerauthor{<author>}{<color>}|
 
 2. This creates four commands automatically:
    \begin{itemize}
-       \item \verb|\<author>|\verb|inline{text}| for marginal comments
-       \item \verb|\<author>|\verb|footnote{text}| for footnotes
+       \item \verb|\<author>|\verb|inline{text}| for inline comments
+       \item \verb|\<author>|\verb|footnote{text}| for comments as footnotes
        \item \verb|\<author>|\verb|add{text}| for additions
        \item \verb|\begin{<author>|\verb|env}| environment
    \end{itemize}
 \end{aliceenv}
 
-\section{Using Review Environments}
-Review environments are perfect for longer comments or marking entire sections that need 
-attention\bobfootnote{Each reviewer's environment uses their assigned color}.
+\section{Text-Addition Environment}
+Text additon environments are perfect for longer additions of text\bobfootnote{Each reviewer's environment uses their assigned color}.
 
 \begin{aliceenv}
 The syntax for environments is:
