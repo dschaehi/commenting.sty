@@ -6,9 +6,9 @@
 
 A LaTeX package for collaborative academic writing with sophisticated comment management and tracking features. Designed with accessibility in mind, featuring colorblind-safe colors for better collaboration.
 
-[[file:page_1.png]]
-[[file:page_2.png]]
-[[file:page_3.png]]
+[[file:page1.png]]
+[[file:page2.png]]
+[[file:page3.png]]
 
 * Features
 
