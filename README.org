@@ -6,10 +6,6 @@
 
 A LaTeX package for collaborative academic writing with sophisticated comment management and tracking features. Designed with accessibility in mind, featuring colorblind-safe colors for better collaboration.
 
-[[file:page1.png]]
-[[file:page2.png]]
-[[file:page3.png]]
-
 * Features
 
 - Color-coded inline comments with author attribution
@@ -41,22 +37,22 @@ Register authors with their assigned colors:
 
 Each registered author gets access to these commands:
 
-| Command                              | Description               |
-|--------------------------------------+---------------------------|
-| =\<author>inline{text}=             | Add an inline comment    |
-| =\<author>footnote{text}=           | Add a footnote comment   |
-| =\<author>add{text}=                | Add tracked text changes |
-| =\begin{<author>env}...=            | Create colored environment|
+| Command                | Description                |
+|------------------------+----------------------------|
+| =\<author>{text}=        | Add tracked text changes   |
+| =\<author>i{text}=       | Add an inline comment      |
+| =\<author>f{text}=       | Add a footnote comment     |
+| =\begin{<author>env}...= | Create colored environment |
 
 ** Example Usage
 
 #+begin_src latex
-This is a paragraph. \aliceinline{needs clarification}
+This is a paragraph. \alicei{needs clarification}
 
-Here's a statement\bobfootnote{Add citation}.
+Here's a statement\bobf{Add citation}.
 
 \begin{bobenv}
-    This is \aliceadd{very} important.
+    This is \alice{very} important.
 \end{bobenv}
 #+end_src
 
@@ -77,12 +73,12 @@ Here's a statement\bobfootnote{Add citation}.
 
 \section{Introduction}
 
-This is a paragraph. \aliceinline{needs clarification}
+This is a paragraph. \alicei{needs clarification}
 
-Here's a statement\bobfootnote{Add citation}.
+Here's a statement\bobf{Add citation}.
 
 \begin{bobenv}
-    This is \aliceadd{very} important.
+    This is \alice{very} important.
 \end{bobenv}
 
 \end{document}
@@ -113,12 +109,6 @@ Two modes available:
 \usepackage[draft]{commenting}  % Show all comments (default)
 \usepackage[final]{commenting} % Hide all comments
 #+end_src
-
-* Author Information
-
-- Author: Jae Hee Lee
-- Website: [[http://jaeheelee.de][jaeheelee.de]]
-- Version: 2024/11/20 v1.1
 
 * License
 

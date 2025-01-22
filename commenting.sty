@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % commenting.sty (https://github.com/dschaehi/commenting.sty)
-% 
+%
 % A LaTeX package for collaborative academic writing with sophisticated comment
 % management and tracking features. This package facilitates:
 %
@@ -17,19 +17,19 @@
 %   \registerauthor{<author>}{<color>}
 %
 % Available Commands:
-%   \<author>inline{text}     - Add an inline comment
-%   \<author>footnote{text}   - Add a footnote comment
-%   \<author>add{text}        - Add tracked text changes
+%   \<author>{text}           - Add tracked text changes
+%   \<author>i{text}          - Add an inline comment
+%   \<author>f{text}          - Add a footnote comment
 %   \begin{<author>env}       - Create a colored environment
 %   \end{<author>env}
 %
 % Example:
 %   \registerauthor{alice}{cbBlue}    % Using colorblind-safe blue
 %   \registerauthor{bob}{cbOrange}    % Using colorblind-safe orange
-%   
-%   \aliceinline{Suggest rephrasing this section}
-%   \bobfootnote{Citation needed here}
-%   This is \aliceadd{important} text.
+%
+%   \alicei{Suggest rephrasing this section}
+%   \bobf{Citation needed here}
+%   This is \alice{important} text.
 %   \begin{bobenv}
 %     This entire paragraph needs review.
 %   \end{bobenv}
@@ -52,7 +52,7 @@
 %
 % Author: Jae Hee Lee
 % Website: jaeheelee.de
-% Version: 2024/11/20 v1.1
+% Version: 2025/01/21 v2.0
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \NeedsTeXFormat{LaTeX2e}
@@ -92,7 +92,8 @@
 \definecolor{cbGray}{RGB}{128,128,128}      % Neutral gray
 
 % Define signature command for author identification
-\newcommand{\signature}[1]{\textsuperscript{\textsf{\MakeUppercase{#1}}}}
+% \newcommand{\signature}[1]{\textsuperscript{\textsf{\MakeUppercase{#1}}}}
+\newcommand{\signature}[1]{\textsuperscript{\textsf{#1}}}
 
 % Setup custom footnote style with alphabetic symbols in red
 \DeclareNewFootnote{A}[fnsymbol]
@@ -130,11 +131,11 @@
 
 % Register a new author with associated commands
 % Args: #1=author identifier, #2=color name
-% Creates: authorinline, authorfootnote, authoradd commands and authorenv environment
+% Creates: \<author>, \<author>f, \<author>i commands and <author>env environment
 \newcommand{\registerauthor}[2]{%
     \expandafter\definecolor{color#1}{named}{#2}%
-    \expandafter\newcommand\csname #1inline\endcsname[1]{\inlinecomment{#1}{color#1}{##1}}
-    \expandafter\newcommand\csname #1footnote\endcsname[1]{\footnotecomment{#1}{color#1}{##1}}
-    \expandafter\newcommand\csname #1add\endcsname[1]{\added{#1}{color#1}{##1}}
+    \expandafter\newcommand\csname #1i\endcsname[1]{\inlinecomment{#1}{color#1}{##1}}
+    \expandafter\newcommand\csname #1f\endcsname[1]{\footnotecomment{#1}{color#1}{##1}}
+    \expandafter\newcommand\csname #1\endcsname[1]{\added{#1}{color#1}{##1}}
     \expandafter\newenvironment{#1env}{\begin{colored}{color#1}{#1}}{\end{colored}}%
 }
