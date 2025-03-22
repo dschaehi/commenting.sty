@@ -70,6 +70,8 @@
 \DeclareOption{final}{\setboolean{isDraft}{false}}
 \ProcessOptions\relax
 
+\ifthenelse{\boolean{isDraft}}{\setkeys{Gin}{draft=false}}
+
 % Required packages
 \RequirePackage[T1]{fontenc}          % For proper font encoding
 \RequirePackage[ruled,perpage]{manyfoot} % For multiple footnote styles
