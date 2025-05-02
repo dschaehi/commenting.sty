@@ -79,6 +79,24 @@
 \RequirePackage{hyperref}             % For hyperlinks
 \AtEndPreamble{\hypersetup{draft=false}} % Disable hyperref draft mode
 
+% Required packages for optional arguments
+\RequirePackage{xparse}
+\RequirePackage{etoolbox}
+
+% Extract first author from \author command
+\newcommand{\getfirstauthor}{%
+    \ifcsname @author\endcsname
+        \expandafter\getfirstauthorhelper\expandafter{\@author}%
+    \else
+        % Empty if \author is undefined
+        {}%
+    \fi
+}
+\newcommand{\getfirstauthorhelper}[1]{%
+    \expandafter\getfirstword#1 \@nil
+}
+\def\getfirstword#1 #2\@nil{#1}
+
 % Colorblind-safe color palette
 % These colors are chosen for maximum distinguishability for all types of color vision
 % Source: Based on ColorBrewer and research on colorblind-safe palettes
@@ -94,8 +112,7 @@
 \definecolor{cbGray}{RGB}{128,128,128}      % Neutral gray
 
 % Define signature command for author identification
-% \newcommand{\signature}[1]{\textsuperscript{\textsf{\MakeUppercase{#1}}}}
-\newcommand{\signature}[1]{\textsuperscript{\textsf{\MakeUppercase{#1}}}}
+\newcommand{\signature}[1]{\textsuperscript{\textsf{#1}}}
 
 % Setup custom footnote style with alphabetic symbols in red
 \DeclareNewFootnote{A}[fnsymbol]
@@ -132,12 +149,33 @@
 {\ifthenelse{\boolean{isDraft}}{}{}}
 
 % Register a new author with associated commands
-% Args: #1=author identifier, #2=color name
-% Creates: \<author>, \<author>f, \<author>i commands and <author>env environment
-\newcommand{\registerauthor}[2]{%
-    \expandafter\definecolor{color#1}{named}{#2}%
-    \expandafter\newcommand\csname #1i\endcsname[1]{\inlinecomment{#1}{color#1}{##1}}
-    \expandafter\newcommand\csname #1f\endcsname[1]{\footnotecomment{#1}{color#1}{##1}}
-    \expandafter\newcommand\csname #1\endcsname[1]{\added{#1}{color#1}{##1}}
-    \expandafter\newenvironment{#1env}{\begin{colored}{color#1}{#1}}{\end{colored}}%
+% Args:
+% #1 (mandatory) = command identifier (e.g., alice for \alice commands)
+% [#2] (optional) = display name (defaults to first word in \author or empty)
+% [#3] (optional) = color name (defaults to cbRed)
+\NewDocumentCommand{\registerauthor}{m o o}{%
+    % Create author-specific variables to avoid overwrites
+    % Get author name - use optional arg if provided, else first author, else empty
+    \IfNoValueTF{#2}
+    {\expandafter\def\csname displayname@#1\endcsname{\getfirstauthor}}
+    {\expandafter\def\csname displayname@#1\endcsname{#2}}%
+
+    % Get color - use optional arg if provided, else cbRed
+    \IfNoValueTF{#3}
+    {\expandafter\def\csname authorcolor@#1\endcsname{cbRed}}
+    {\expandafter\def\csname authorcolor@#1\endcsname{#3}}%
+
+    % Define color using author-specific color name
+    \expandafter\definecolor{color#1}{named}{\csname authorcolor@#1\endcsname}%
+
+    % Define commands using command identifier and author-specific display name
+    \expandafter\newcommand\csname #1i\endcsname[1]{%
+        \inlinecomment{\csname displayname@#1\endcsname}{color#1}{##1}}%
+    \expandafter\newcommand\csname #1f\endcsname[1]{%
+        \footnotecomment{\csname displayname@#1\endcsname}{color#1}{##1}}%
+    \expandafter\newcommand\csname #1\endcsname[1]{%
+        \added{\csname displayname@#1\endcsname}{color#1}{##1}}%
+    \expandafter\newenvironment{#1env}{%
+        \begin{colored}{color#1}{\csname displayname@#1\endcsname}}%
+            {\end{colored}}%
 }

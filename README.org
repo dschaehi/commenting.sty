@@ -27,22 +27,29 @@ A LaTeX package for collaborative academic writing with sophisticated comment ma
 
 ** Author Registration
 
-Register authors with their assigned colors:
+Register authors with command prefix, optional display name, and optional color:
 
 #+begin_src latex
-\registerauthor{<author>}{<color>}    % Register author with chosen color
+% Basic registration with default display name (first author name or empty) and color (cbRed)
+\registerauthor{alice}
+
+% With custom display name (color defaults to cbRed)
+\registerauthor{bob}[Robert Smith]
+
+% With custom display name and color
+\registerauthor{charlie}[Charles Davis][cbBlue]
 #+end_src
 
 ** Available Commands
 
-Each registered author gets access to these commands:
+For each registered author (e.g., =alice=), the following commands are created:
 
 | Command                | Description                |
 |------------------------+----------------------------|
-| =\<author>{text}=        | Add tracked text changes   |
-| =\<author>i{text}=       | Add an inline comment      |
-| =\<author>f{text}=       | Add a footnote comment     |
-| =\begin{<author>env}...= | Create colored environment |
+| =\alice{text}=         | Add tracked text changes   |
+| =\alicei{text}=        | Add an inline comment      |
+| =\alicef{text}=        | Add a footnote comment     |
+| =\begin{aliceenv}...=  | Create colored environment |
 
 ** Example Usage
 
@@ -62,8 +69,9 @@ Here's a statement\bobf{Add citation}.
 \documentclass{article}
 \usepackage[draft]{commenting}
 
-\registerauthor{alice}{cbBlue}    % Register Alice with blue color
-\registerauthor{bob}{cbOrange}    % Register Bob with orange color
+% Register authors with command prefix, display name, and color
+\registerauthor{alice}[Alice Johnson][cbBlue]
+\registerauthor{bob}[Robert Smith][cbOrange]
 
 \title{\texttt{commenting.sty} examples}
 \date{}
