@@ -1,0 +1,24 @@
+\documentclass{article}
+\usepackage[draft]{commenting}
+
+% Register authors with command prefix, display name, and color
+\registerauthor{alice}[Alice Johnson][cbBlue]
+\registerauthor{bob}[Robert Smith][cbOrange]
+
+\title{\texttt{commenting.sty} examples}
+\date{}
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+This is a paragraph. \alicei{needs clarification}
+
+Here's a statement\bobf{Add citation}.
+
+\begin{bobenv}
+    This is \alice{very} important.
+\end{bobenv}
+
+\end{document}
