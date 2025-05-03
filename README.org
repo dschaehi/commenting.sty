@@ -92,7 +92,7 @@ Here's a statement\bobf{Add citation}.
 \end{document}
 #+end_src
 
-
+[[file:example.jpg]]
 
 * Color Documentation
 
