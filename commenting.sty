@@ -57,7 +57,7 @@
 %
 % Author: Jae Hee Lee
 % Website: jaeheelee.de
-% Version: 2025/01/21 v2.0
+% Version: 2025/08/06 v2.1
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \NeedsTeXFormat{LaTeX2e}
@@ -124,29 +124,45 @@
 \DeclareNewFootnote{A}[fnsymbol]
 \renewcommand{\thefootnoteA}{\textcolor{red}{\alph{footnoteA}}}
 
+% Fix hyperref compatibility with manyfoot
+\@ifpackageloaded{hyperref}{%
+    \renewcommand{\footnoteA}[1]{%
+        \stepcounter{footnoteA}%
+        \protected@xdef\@thefnmark{\thefootnoteA}%
+        \hyper@makecurrent{footnoteA}%
+        \@footnotemark%
+        \@footnotetext{#1}%
+    }%
+}{}
+
 % Command for footnote-style comments
 % Args: #1=author identifier, #2=color, #3=comment text
-\newcommand{\footnotecomment}[3]{%
+\newcommand{\footnotecommentFragile}[3]{%
     \ifthenelse{\boolean{isDraft}}%
     {\protect{\color{#2}\footnoteA{\color{#2}\guillemotright#3\guillemotleft\signature{#1}}}}%
     {}%
 }
+\DeclareRobustCommand{\footnotecomment}[3]{\footnotecommentFragile{#1}{#2}{#3}}
 
 % Command for inline comments
 % Args: #1=author identifier, #2=color, #3=comment text
-\newcommand{\inlinecomment}[3]{%
+\newcommand{\inlinecommentFragile}[3]{%
     \ifthenelse{\boolean{isDraft}}%
     {{\noindent\small\leavevmode\color{#2}\guillemotright#3\guillemotleft\signature{#1}}}%
     {\unskip}%
 }
+\DeclareRobustCommand{\inlinecomment}[3]{\inlinecommentFragile{#1}{#2}{#3}}
+
 
 % Command for added text with author attribution
 % Args: #1=author identifier, #2=color, #3=added text
-\newcommand{\added}[3]{{%
+\newcommand{\addedFragile}[3]{{%
             \ifthenelse{\boolean{isDraft}}
             {\leavevmode\color{#2}#3\signature{#1}}
             {#3}}%
 }
+\DeclareRobustCommand{\added}[3]{\addedFragile{#1}{#2}{#3}}
+
 
 % Environment for colored text blocks with margin notes
 % Args: #1=color, #2=author identifier
