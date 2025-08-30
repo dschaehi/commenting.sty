@@ -1,67 +1,43 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % commenting.sty (https://github.com/dschaehi/commenting.sty)
 %
-% A LaTeX package for collaborative academic writing with sophisticated comment
-% management and tracking features. This package facilitates:
+% Collaborative academic writing support:
+%   - Tracked author-tagged insertions
+%   - Inline (in-text) reviewer / author comments
+%   - Footnote-style comments (separate stream, alphabetic, colorized)
+%   - Multi-line inline & footnote comment environments
+%   - Author-colored block environments (highlighted paragraphs)
+%   - Draft / final mode switch (all markup suppressed in final)
+%   - Colorblind-safe palette (ten distinct hues)
+%   - Minimal keystroke cost: per-author macro namespace (\alice, \alicei, \alicef, etc.)
 %
-% Features:
-%   * Color-coded inline comments with author attribution
-%   * Distinct footnote-style annotations
-%   * Tracked text additions with author identification
-%   * Author-specific colored environments
-%   * Smart draft/final mode switching
-%   * Colorblind-safe predefined colors (cbBlue, cbOrange, cbTeal, cbRed, cbPurple, cbGreen, cbYellow, cbPink, cbBrown, cbGray)
+% Design goals:
+%   * Zero output artifacts in final mode
+%   * Robustness in moving arguments (footnotes / section titles) via \DeclareRobustCommand
+%   * Accessibility: palette chosen for distinguishability under common CVD types
+%   * Low coupling: no redefinition of LaTeX core user-facing macros
 %
-% Basic Usage:
-%   \usepackage[draft|final]{commenting}
-%   \registerauthor{<author>}[<displayname>][<color>]
+% Quick Start:
+%   \usepackage[draft]{commenting}
+%   \registerauthor{alice}[Alice][cbBlue]
+%   \registerauthor{bob}[Bob][cbOrange]
+%   Some \alice{added text}. \alicei{Inline note} \bobf{Footnote note}
 %
-% Registration Options:
-%   \registerauthor{alice}                      % Use first author name and cbRed
-%   \registerauthor{alice}[Alice]               % Custom display name, cbRed color
-%   \registerauthor{alice}[Alice][cbBlue]       % Custom display name and color
+% Generated per author X:
+%   \X{<text>}        Added text (colored + superscript signature in draft; plain in final)
+%   \Xi{<comment>}    Inline comment (draft only)
+%   \Xf{<comment>}    Footnote comment (draft only, alphabetic marker)
+%   \begin{Xenv} ... \end{Xenv}    Colored paragraph environment (draft only margin signature)
+%   \begin{Xienv} ... \end{Xienv}  Multi-line inline comment (draft only)
+%   \begin{Xfenv} ... \end{Xfenv}  Multi-line footnote comment (draft only)
 %
-% Available Commands:
-%   \<author>{text}           - Add tracked text changes
-%   \<author>i{text}          - Add an inline comment
-%   \<author>f{text}          - Add a footnote comment
-%   \begin{<author>env}       - Create a colored environment
-%   \end{<author>env}
-%
-% Example:
-%   \registerauthor{alice}[Alice][cbBlue]    % Using colorblind-safe blue
-%   \registerauthor{bob}[Bob][cbOrange]    % Using colorblind-safe orange
-%
-%   \alicei{Suggest rephrasing this section}
-%   \bobf{Citation needed here}
-%   This is \alice{important} text.
-%   \begin{bobenv}
-%     This entire paragraph needs review.
-%   \end{bobenv}
-%
-% Predefined Colors:
-%   cbBlue   - Strong blue    (RGB: 51,114,189)
-%   cbOrange - Vivid orange   (RGB: 255,127,42)
-%   cbTeal   - Bright teal    (RGB: 64,204,204)
-%   cbRed    - Clear red      (RGB: 217,37,37)
-%   cbPurple - Muted purple   (RGB: 148,103,189)
-%   cbGreen  - Bright green   (RGB: 0,158,115)
-%   cbYellow - Vivid yellow   (RGB: 240,228,66)
-%   cbPink   - Soft pink      (RGB: 204,121,167)
-%   cbBrown  - Warm brown     (RGB: 146,73,0)
-%   cbGray   - Neutral gray   (RGB: 128,128,128)
-%
-% Options:
-%   draft  - Show all comments and markup (default when document class uses draft)
-%   final  - Hide all comments and markup
-%
-% Author: Jae Hee Lee
-% Website: jaeheelee.de
-% Version: 2025/08/06 v2.1
+% Version History:
+%   v2.1 (2025/08/06)  Documentation improvements; metadata sync
+%   v2.0 (2025/01/21)  Refactor & robust command declarations
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{commenting}[2025/01/21 v2.0 by Jae Hee Lee (http://jaeheelee.de)]
+\ProvidesPackage{commenting}[2025/08/06 v2.1 by Jae Hee Lee (http://jaeheelee.de)]
 
 % Package options and draft mode handling
 \RequirePackage{ifthen}
@@ -86,6 +62,7 @@
 % Required packages for optional arguments and hooks
 \RequirePackage{xparse}
 \RequirePackage{etoolbox}
+\RequirePackage{environ}              % For capturing environment content
 \RequirePackage{graphicx}
 \ifthenelse{\boolean{isDraft}}{\setkeys{Gin}{draft=false}}
 
@@ -200,4 +177,72 @@
     \expandafter\newenvironment{#1env}{%
         \begin{colored}{color#1}{\csname displayname@#1\endcsname}}%
             {\end{colored}}%
+    
+    % Add environment versions of inline and footnote comments
+    % We need to use \csname and \endcsname correctly with NewEnviron
+    \expandafter\newcommand\expandafter{\csname create#1ienv\endcsname}{%
+        \NewEnviron{#1ienv}{%
+            \ifthenelse{\boolean{isDraft}}%
+            {\noindent\small\leavevmode\color{color#1}\guillemotright\BODY\guillemotleft\signature{\csname displayname@#1\endcsname}}%
+            {}% In final mode, discard content
+        }[]%
+    }%
+    \csname create#1ienv\endcsname
+    
+    \expandafter\newcommand\expandafter{\csname create#1fenv\endcsname}{%
+        \NewEnviron{#1fenv}{%
+            \ifthenelse{\boolean{isDraft}}%
+            {\footnoteA{\color{color#1}\guillemotright\BODY\guillemotleft\signature{\csname displayname@#1\endcsname}}}%
+            {}% In final mode, discard content
+        }[]%
+    }%
+    \csname create#1fenv\endcsname
 }
+
+% Draft / final mode resolution
+% Priority: explicit package option > document class draft option > default final
+% Boolean \ifthenelse{\boolean{isDraft}} used everywhere to gate output.
+
+% Accessibility palette:
+% Each color name (cbBlue, ...) is stable API for user overrides if desired.
+% The per-author color macro 'color<id>' is a named alias pointing here,
+% allowing late palette substitutions without touching user documents.
+
+% Footnote stream rationale:
+%   We use manyfoot's separate stream (footnoteA) to avoid interfering with
+%   the document's primary scholarly footnotes. Alphabetic markers are tinted
+%   red for immediate visual separation. In final mode they vanish entirely.
+
+% \signature{<display name>}
+%   Produces a compact superscript sans-serif author tag.
+%   Used uniformly so a user may redefine globally if styling changes.
+
+% Inline vs Footnote comment implementation notes:
+%   * Inline comments are typeset directly; they do not reserve space in final mode.
+%   * Footnote comments leverage the dedicated footnoteA stream.
+%   * Robust wrappers guard against expansion in moving arguments.
+
+% \inlinecomment / \footnotecomment / \added
+% Low-level 3-argument worker macros:
+%   #1 = display name, #2 = color name, #3 = user text
+% Users should normally invoke the per-author wrappers generated by \registerauthor.
+
+% Environment 'colored':
+%   Provides a colored block with a margin signature (draft only).
+%   Used to build <author>env environments. Leaves body untouched in final mode.
+
+% \registerauthor{<id>}[<Display Name>][<Color>]
+% Responsibilities:
+%   * Store display name & color in namespaced control sequences
+%   * Define per-author macros: \<id>, \<id>i, \<id>f
+%   * Define block environment: <id>env
+%   * Define multi-line comment envs: <id>ienv (inline), <id>fenv (footnote)
+% Implementation details:
+%   - Display name defaults to first token of \author (if present); empty otherwise.
+%   - Color defaults to cbRed.
+%   - A dedicated named color 'color<id>' is defined so later palette adjustments
+%     (e.g., via \definecolor) remain isolated.
+%   - Two helper \newcommand wrappers create the environments using NewEnviron.
+% Final mode behavior:
+%   * All comment environments become no-ops (content discarded).
+%   * Added text still appears, but without coloration or signature.

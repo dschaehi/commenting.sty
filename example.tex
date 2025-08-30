@@ -1,24 +1,128 @@
 \documentclass{article}
 \usepackage[draft]{commenting}
 
-% Register authors with command prefix, display name, and color
+% Register authors with different configurations to showcase options
 \registerauthor{alice}[Alice Johnson][cbBlue]
-\registerauthor{bob}[Robert Smith]
+\registerauthor{bob}[Robert Smith]        % Default cbRed color
+\registerauthor{charlie}                  % Default display name and cbRed color
+\registerauthor{diana}[Dr. Diana][cbGreen]
 
-\title{\texttt{commenting.sty} examples}
+\title{\texttt{commenting.sty} Comprehensive Examples}
+\author{Jae Hee Lee}
 \date{}
+
 \begin{document}
 
 \maketitle
 
 \section{Introduction}
 
-This is a paragraph. \alicei{needs clarification}
+The \texttt{commenting.sty} package provides sophisticated commenting and collaboration features for LaTeX documents. This document demonstrates all available features.
 
-Here's a statement\bobf{Add citation}.
+\section{Basic Comment Types}
+
+\subsection{Inline Comments}
+
+Regular text with \alicei{This is an inline comment from Alice} inline comments. Bob can also add \bobi{his thoughts inline}.
+
+\subsection{Footnote Comments}
+
+Text with footnote comments\alicef{This appears as a footnote with author attribution} works well for longer explanations\bobf{Another footnote comment from Bob with different color}.
+
+\subsection{Tracked Text Changes}
+
+Here is some \alice{newly added} text that shows authorship. Bob made \bob{his changes} as well.
+
+\section{Environment Types}
+
+\subsection{Colored Environments}
+
+\begin{aliceenv}
+    This entire paragraph is highlighted in Alice's color (blue) and includes her signature in the margin. This is useful for marking entire sections that need review or represent specific author contributions.
+\end{aliceenv}
 
 \begin{bobenv}
-    This is \alice{very} important.
+    This paragraph uses Bob's default red color since no specific color was assigned during registration.
 \end{bobenv}
+
+\subsection{Multi-line Inline Comments}
+
+\begin{aliceienv}
+    This is a multi-line inline comment from Alice.
+    It can span multiple paragraphs and lines.
+    Perfect for longer explanations that don't fit in single-line comments.
+\end{aliceienv}
+
+\begin{dianaienv}
+    Diana's multi-line inline comment in green.
+    These comments appear inline but can contain
+    extensive explanations and suggestions.
+\end{dianaienv}
+
+\subsection{Multi-line Footnote Comments}
+
+Here's some text that needs explanation\begin{bobfenv}
+    This is Bob's multi-line footnote comment.
+    It appears as a footnote but can contain
+    multiple paragraphs of detailed explanation,
+    citations, or extended discussions.
+\end{bobfenv}.
+
+More text\begin{alicefenv}
+    Alice's extended footnote comment
+    with multiple lines and detailed
+    analysis of the preceding text.
+\end{alicefenv}.
+
+\section{Color Showcase}
+
+The package provides colorblind-safe colors:
+
+\begin{aliceenv}
+    Alice uses cbBlue (RGB: 51,114,189) - Strong blue
+\end{aliceenv}
+
+\begin{bobenv}
+    Bob uses cbRed (RGB: 217,37,37) - Clear red (default)
+\end{bobenv}
+
+\begin{dianaenv}
+    Diana uses cbGreen (RGB: 0,158,115) - Bright green
+\end{dianaenv}
+
+\registerauthor{eve}[Eve][cbOrange]
+\begin{eveenv}
+    Eve demonstrates cbOrange (RGB: 255,127,42) - Vivid orange
+\end{eveenv}
+
+\section{Mixed Usage Example}
+
+In collaborative writing, authors often need to \alice{add new content}, \alicei{make suggestions}, and provide \alicef{detailed explanations}.
+
+\begin{bobenv}
+    Bob might highlight entire sections for review while also adding \bob{specific insertions} and \bobi{quick notes}.
+\end{bobenv}
+
+\begin{dianaienv}
+    Diana can provide extensive inline feedback
+    covering multiple aspects of the text,
+    including style, content, and structure.
+\end{dianaienv}
+
+For complex discussions\begin{bobfenv}
+    Bob might use multi-line footnotes
+    to provide detailed citations,
+    alternative perspectives,
+    or comprehensive explanations
+    that would be too lengthy for inline comments.
+\end{bobfenv}, while still maintaining \bob{tracked changes} in the main text.
+
+\section{Final vs Draft Mode}
+
+This document is compiled in \texttt{draft} mode, showing all comments and markups. In \texttt{final} mode (\texttt{\textbackslash usepackage[final]\{commenting\}}), all comments disappear and only the base text with tracked additions remains.
+
+\section{Conclusion}
+
+The \texttt{commenting.sty} package provides a comprehensive toolkit for collaborative academic writing with \alice{robust}, \bobi{flexible}, and \diana{accessible} features\alicef{The colorblind-safe palette ensures inclusivity}.
 
 \end{document}
