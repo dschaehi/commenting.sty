@@ -126,7 +126,7 @@
 \newcommand{\inlinecommentFragile}[3]{%
     \ifthenelse{\boolean{isDraft}}%
     {{\noindent\small\leavevmode\color{#2}\guillemotright#3\guillemotleft\signature{#1}}}%
-    {\unskip}%
+    {\noindent\unskip}%
 }
 \DeclareRobustCommand{\inlinecomment}[3]{\inlinecommentFragile{#1}{#2}{#3}}
 
