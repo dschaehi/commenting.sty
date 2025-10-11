@@ -1,9 +1,12 @@
 # commenting.sty
 
+**Version 2.1** (2025/08/06)
+
 Lightweight, color‑coded collaborative annotation tools for LaTeX manuscripts.
 
 ## Features
 - Added (tracked) text with per‑author signatures
+- Deleted (strikethrough) text with per‑author signatures
 - Inline and footnote-style comments
 - Multi-line inline and footnote comment environments
 - Colored paragraph environments (author-highlighted blocks)
@@ -25,8 +28,8 @@ Place `commenting.sty` somewhere in your `TEXINPUTS` path (same directory or a l
 \registerauthor{alice}[Alice][cbBlue]
 \registerauthor{bob}[Bob][cbOrange]
 
-Some \alice{new important wording}. \alicei{Maybe refine term?}
-\bobf{Source?} Added sentence.
+Some \alice{new important wording}. \alicedel{removed text}
+\alicei{Maybe refine term?} \bobf{Source?} Added sentence.
 
 \begin{aliceienv}
 Spanning multi-line inline comment.
@@ -116,14 +119,21 @@ Comment footnotes use a separate `manyfoot` stream (alphabetic, tinted marker) s
 \usepackage[draft]{commenting}
 \registerauthor{alice}[Alice][cbBlue]
 \begin{document}
-An \alice{additional} clarification. \alicei{Check phrasing.}
+An \alice{additional} clarification. \alicedel{old text}
+\alicei{Check phrasing.}
 \end{document}
 ```
 
+## Example Output
+
+![Example Output](example.png)
+
+See `example.tex` for a complete demonstration of all features.
+
 ## Roadmap
-- Deletion / replacement markup (`\strike`, `\replace`)
 - Comment list / summary generator
 - Export comments to external JSON
+- Additional markup variants
 
 ## License
 MIT (see repository).
