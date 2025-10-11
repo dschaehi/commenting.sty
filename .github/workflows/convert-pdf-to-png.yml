@@ -1,0 +1,38 @@
+name: Convert PDF to PNG
+
+on:
+  push:
+    paths:
+      - 'example.pdf'
+  workflow_dispatch:
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Install ImageMagick
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y imagemagick ghostscript
+          
+      - name: Update ImageMagick policy for PDF
+        run: |
+          sudo sed -i 's/rights="none" pattern="PDF"/rights="read|write" pattern="PDF"/' /etc/ImageMagick-6/policy.xml
+          
+      - name: Convert PDF to PNG
+        run: |
+          convert -density 300 example.pdf -background white -alpha remove -alpha off example.png
+          
+      - name: Commit and push PNG if changed
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add example.png
+          git diff --staged --quiet || git commit -m "Auto-update example.png from PDF"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
