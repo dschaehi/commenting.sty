@@ -58,7 +58,7 @@
 \RequirePackage[ruled,perpage]{manyfoot} % For multiple footnote styles
 \RequirePackage{xcolor}               % For colored text
 \RequirePackage{hyperref}             % For hyperlinks
-\AtEndPreamble{\hypersetup{draft=false}} % Disable hyperref draft mode
+\AtEndPreamble{\hypersetup{draft=false}} % Disable hyperref draft mode and link borders
 \RequirePackage[normalem]{ulem}       % For strikethrough (normalem preserves \emph)
 
 % Required packages for optional arguments and hooks
@@ -103,14 +103,27 @@
 \DeclareNewFootnote{A}[fnsymbol]
 \renewcommand{\thefootnoteA}{\textcolor{red}{\alph{footnoteA}}}
 
-% Fix hyperref compatibility with manyfoot
+% Counter for footnote backlinks
+\newcounter{footnotebacklink}
+
+% Fix hyperref compatibility with manyfoot and add backlink support
 \@ifpackageloaded{hyperref}{%
     \renewcommand{\footnoteA}[1]{%
         \stepcounter{footnoteA}%
+        \stepcounter{footnotebacklink}%
         \protected@xdef\@thefnmark{\thefootnoteA}%
         \hyper@makecurrent{footnoteA}%
+        % Create hypertarget at the point where footnote is called
+        \edef\@currentbacklink{footnotebacklink.\thefootnotebacklink}%
+        \hypertarget{\@currentbacklink}{}%
         \@footnotemark%
+        % Add footnote text with clickable marker
+        \begingroup
+        \protected@xdef\@thefnmark{%
+            \protect\hyperlink{\@currentbacklink}{\thefootnoteA}%
+        }%
         \@footnotetext{#1}%
+        \endgroup
     }%
 }{}
 
