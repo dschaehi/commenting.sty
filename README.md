@@ -60,6 +60,16 @@ Defaults:
 - Display Name: first token of `\author` (if any) else empty
 - Color: `cbRed`
 
+Special values:
+- Display Name: use `none` to hide signatures (anonymous comments)
+
+Examples:
+```latex
+\registerauthor{alice}[Alice][cbBlue]          % Named author with blue color
+\registerauthor{bob}                           % Uses first author name, default color
+\registerauthor{reviewer}[none][cbGreen]       % Anonymous (no signature shown)
+```
+
 For `id = alice` you get:
 - `\alice{<text>}` added text (draft: colored + signature; final: plain)
 - `\alicei{<comment>}` inline comment (draft only)
