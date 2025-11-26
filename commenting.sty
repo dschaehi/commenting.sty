@@ -43,6 +43,9 @@
 % Package options and draft mode handling
 \RequirePackage{ifthen}
 \newboolean{isDraft}
+\newboolean{useBackground}
+\setboolean{useBackground}{false}  % Default: no background
+\def\bgColor{white}  % Default background color for mixing
 
 % First set default based on document class
 \@ifclasswith{article}{draft}{\setboolean{isDraft}{true}}{\setboolean{isDraft}{false}}
@@ -50,6 +53,7 @@
 % Then let package options override
 \DeclareOption{draft}{\setboolean{isDraft}{true}}
 \DeclareOption{final}{\setboolean{isDraft}{false}}
+\DeclareOption{bg=sepia}{\setboolean{useBackground}{true}\def\bgColor{commentingSepia}}
 \ProcessOptions\relax
 
 
@@ -102,7 +106,7 @@
 \definecolor{cbPink}{RGB}{204,121,167}      % Soft pink
 \definecolor{cbBrown}{RGB}{146,73,0}        % Warm brown
 \definecolor{cbGray}{RGB}{128,128,128}      % Neutral gray
-\definecolor{MySepia}{HTML}{EDE7DA}         % Sepia background for draft mode
+\definecolor{commentingSepia}{HTML}{EDE7DA} % Sepia background for draft mode
 
 % Define signature command for author identification
 \newcommand{\signature}[1]{{\scriptsize\textsf{#1}}}
@@ -148,7 +152,7 @@
 % Args: #1=author identifier, #2=color, #3=comment text
 \newcommand{\inlinecommentFragile}[3]{%
 	\ifthenelse{\boolean{isDraft}}%
-	{{\leavevmode\small\color{#2}\sethlcolor{#2!3!MySepia}\hl{[{\scriptsize\textsf{#1}}: #3]}}}{}%	
+	{{\leavevmode\small\color{#2}\sethlcolor{#2!3!\bgColor}\hl{[{\scriptsize\textsf{#1}}: #3]}}}{}%	
 }
 \DeclareRobustCommand{\inlinecomment}[3]{\inlinecommentFragile{#1}{#2}{#3}}
 
@@ -219,7 +223,7 @@
 		\NewEnviron{#1ienv}{%
 			\ifthenelse{\boolean{isDraft}}%
 			{
-				\begin{mdframed}[linewidth=1.5pt,linecolor=color#1,topline=false,leftline=true,rightline=false,bottomline=false,backgroundcolor=color#1!3!MySepia]
+				\begin{mdframed}[linewidth=1.5pt,linecolor=color#1,topline=false,leftline=true,rightline=false,bottomline=false,backgroundcolor=color#1!3!\bgColor]
 					\color{color#1}\marginnote{\vspace*{-\baselineskip}\signature{\csname displayname@#1\endcsname}}\noindent{\small\leavevmode\color{color#1}\BODY}
 				\end{mdframed}
 			}%
@@ -252,9 +256,11 @@
 
 \RequirePackage{ifdraft}
 \ifdraft{
-	\RequirePackage{pagecolor}
-	\pagecolor{MySepia}
-	\color{black}
+	\ifthenelse{\boolean{useBackground}}{
+		\RequirePackage{pagecolor}
+		\pagecolor{\bgColor}
+		\color{black}
+	}{}
 	\hbadness=99999  % or any number >=10000
 	\vbadness=99999  % or any number >=10000
 }{}
