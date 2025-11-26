@@ -1,63 +1,61 @@
-\documentclass[10pt,draft]{article}
-\usepackage[margin=0.75in]{geometry}
-\usepackage{commenting}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  example.tex — Quick Demo of commenting.sty
+%  Compile: pdflatex example.tex
+%  Try: Change [draft] to [final] to see annotations disappear
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Register authors with different color configurations
+\documentclass[11pt,draft]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[draft]{commenting}
+
+%% Register collaborators (colorblind-safe palette)
 \registerauthor{alice}[Alice][cbBlue]
 \registerauthor{bob}[Bob][cbOrange]
-\registerauthor{carol}[none][cbGreen]  % No signature display
 
-\title{\texttt{commenting.sty} v2.1 Feature Demo}
-\author{Example Document}
+\title{\texttt{commenting.sty} Quick Demo}
+\author{}
 \date{}
 
 \begin{document}
 \maketitle
-\vspace{-1em}
+\thispagestyle{empty}
 
-\section{Text Tracking}
+\section*{Text Additions \& Deletions}
 
-Original text with \alice{added content} and \bobdel{deleted material}. Multiple authors can \bob{contribute} to the same sentence.
+The \bobdel{old}\bob{new} algorithm runs \alice{significantly} faster.
 
-\section{Comment Types}
+\section*{Inline \& Footnote Comments}
 
-Inline comments \alicei{like this} appear directly in text. Footnote comments\bobf{appear at bottom} keep the main text clean. The package supports\carolf{anonymous comments too} various configurations.
+Results look promising.\alicei{Verify on larger dataset.}
+The method generalizes well\bobf{Add citation to Smith et al. (2024) here.}.
 
-\section{Multi-line Comments}
+\section*{Multi-line Comments}
 
 \begin{aliceienv}
-Multi-line inline comments span several lines,
-perfect for detailed suggestions or discussions.
+	This entire section needs revision before submission.
+	Consider restructuring the argument flow.
 \end{aliceienv}
 
-Regular text continues here\begin{bobfenv}
-while multi-line footnote comments
-provide extended explanations
-without cluttering the main text.
-\end{bobfenv}.
-
-\section{Colored Environments}
-
-\begin{aliceenv}
-Entire paragraphs can be highlighted with author colors and margin signatures. This is useful for marking sections under review or highlighting specific contributions.
-\end{aliceenv}
-
-\vspace{2\baselineskip}
+\section*{Author Blocks}
 
 \begin{bobenv}
-Different authors get different colors from the colorblind-safe palette, ensuring accessibility for all collaborators.
+	Paragraphs can be marked as specific author contributions,\\
+	with colored text and margin signatures for easy identification.
 \end{bobenv}
 
-\section{Combined Features}
+\section*{TODO Lists}
 
-In practice, authors combine \alice{additions}, \alicedel{deletions}, \alicei{quick notes}, and detailed comments\alicef{with full citations or explanations} to create a rich collaborative environment.
+\begin{todoenv}
+	\begin{todolist}
+		\item Write abstract
+		\item[\doing] Revise introduction
+		\item[\done] Run experiments
+	\end{todolist}
+\end{todoenv}
 
-\begin{carolienv}
-Even authors without displayed signatures
-can contribute multi-line comments effectively.
-\end{carolienv}
-
-\vspace{0.5em}
-\noindent\textbf{Note:} In final mode (\texttt{[final]}), all comments vanish and only the base text with additions remains.
+\vfill
+\noindent\rule{\textwidth}{0.4pt}\\[0.5ex]
+\small\textbf{Tip:} Change \texttt{[draft]} to \texttt{[final]} — all annotations vanish, text additions remain.\\
+See \texttt{documentation.tex} for the complete feature reference.
 
 \end{document}

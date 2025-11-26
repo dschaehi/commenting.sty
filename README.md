@@ -1,153 +1,142 @@
 # commenting.sty
 
-**Version 2.1** (2025/08/06)
+![Example Output](example.png)
 
-Lightweight, color‑coded collaborative annotation tools for LaTeX manuscripts.
+**Version 2.2** · Collaborative annotation tools for LaTeX manuscripts
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+---
 
 ## Features
-- Added (tracked) text with per‑author signatures
-- Deleted (strikethrough) text with per‑author signatures
-- Inline and footnote-style comments
-- Multi-line inline and footnote comment environments
-- Colored paragraph environments (author-highlighted blocks)
-- Draft / final mode switch (all markup suppressed in final mode)
-- Colorblind-safe palette (10 distinct hues)
-- Minimal macro namespace pollution (per-author command families)
 
-## Installation
-Place `commenting.sty` somewhere in your `TEXINPUTS` path (same directory or a local texmf tree), then:
+- **Text tracking** — Mark additions and deletions with author colors and signatures
+- **Inline comments** — Highlighted notes directly in the text flow
+- **Footnote comments** — Alphabetic markers with clickable bidirectional links
+- **Multi-line environments** — Extended comment blocks and footnotes
+- **Colored paragraphs** — Highlight entire sections with margin signatures
+- **Draft/final toggle** — All markup vanishes cleanly in final mode
+- **Colorblind-safe palette** — 10 CVD-friendly colors for accessibility
+- **Sepia background** — Optional warm background for comfortable editing
+- **TODO lists** — Checkbox environment with progress markers
 
-```latex
-\usepackage[draft]{commenting} % or [final]
-```
-
-## Basic Usage
+## Quick Start
 
 ```latex
 \usepackage[draft]{commenting}
 \registerauthor{alice}[Alice][cbBlue]
 \registerauthor{bob}[Bob][cbOrange]
 
-Some \alice{new important wording}. \alicedel{removed text}
-\alicei{Maybe refine term?} \bobf{Source?} Added sentence.
-
-\begin{aliceienv}
-Spanning multi-line inline comment.
-\end{aliceienv}
-
-\begin{bobfenv}
-Longer rationale in a footnote comment block.
-\end{bobfenv}
-
-\begin{aliceenv}
-This whole paragraph is highlighted for Alice.
-\end{aliceenv}
+The \bobdel{old}\bob{new} method is \alice{significantly} faster.
+\alicei{Verify this claim.} \bobf{Add citation here.}
 ```
 
-Switch to final mode:
+## Installation
+
+Copy `commenting.sty` to your project directory or TeX path, then:
 
 ```latex
-\usepackage[final]{commenting}
+\usepackage[draft]{commenting}          % Show all annotations
+\usepackage[draft,bg=sepia]{commenting} % With sepia background
+\usepackage[final]{commenting}          % Hide all annotations
 ```
 
-## Author Registration
+---
+
+## Commands Reference
+
+### Author Registration
 
 ```latex
-\registerauthor{<id>}[<Display Name>][<Color>]
+\registerauthor{id}[Display Name][color]
 ```
 
-Defaults:
-- Display Name: first token of `\author` (if any) else empty
-- Color: `cbRed`
+Creates a command suite for each author:
 
-Special values:
-- Display Name: use `none` to hide signatures (anonymous comments)
+| Command | Purpose | Final Mode |
+|---------|---------|------------|
+| `\alice{text}` | Added text | Text remains |
+| `\alicedel{text}` | Deleted text | Removed |
+| `\alicei{note}` | Inline comment | Hidden |
+| `\alicef{note}` | Footnote comment | Hidden |
+| `aliceenv` | Colored block | Plain text |
+| `aliceienv` | Multi-line inline | Hidden |
+| `alicefenv` | Multi-line footnote | Hidden |
 
-Examples:
-```latex
-\registerauthor{alice}[Alice][cbBlue]          % Named author with blue color
-\registerauthor{bob}                           % Uses first author name, default color
-\registerauthor{reviewer}[none][cbGreen]       % Anonymous (no signature shown)
-```
-
-For `id = alice` you get:
-- `\alice{<text>}` added text (draft: colored + signature; final: plain)
-- `\alicei{<comment>}` inline comment (draft only)
-- `\alicef{<comment>}` footnote comment (draft only)
-- `\begin{aliceenv}...\end{aliceenv}` colored block (draft only margin signature)
-- `\begin{aliceienv}...\end{aliceienv}` multi-line inline comment (draft only)
-- `\begin{alicefenv}...\end{alicefenv}` multi-line footnote comment (draft only)
-
-## Draft vs Final Behavior
-
-| Element               | Draft                         | Final                      |
-|-----------------------|-------------------------------|----------------------------|
-| Added text            | Color + signature             | Plain text                 |
-| Inline comment        | Visible                       | Removed                    |
-| Footnote comment      | Visible footnote              | Removed                    |
-| Inline comment env    | Visible                       | Removed                    |
-| Footnote comment env  | Visible footnote              | Removed                    |
-| Colored block env     | Highlight + margin signature  | Body only (uncolored)      |
-
-## Color Palette (Colorblind-Safe)
-
-| Name     | RGB          | Role / Hint                  |
-|----------|--------------|------------------------------|
-| cbBlue   | 51,114,189   | Strong cool base             |
-| cbOrange | 255,127,42   | Warm contrast                |
-| cbTeal   | 64,204,204   | Soft accent                  |
-| cbRed    | 217,37,37    | High-salience warning        |
-| cbPurple | 148,103,189  | Muted secondary              |
-| cbGreen  | 0,158,115    | Positive / approval          |
-| cbYellow | 240,228,66   | Caution / highlight          |
-| cbPink   | 204,121,167  | Neutral accent               |
-| cbBrown  | 146,73,0     | Earth tone separation        |
-| cbGray   | 128,128,128  | Neutral / meta               |
-
-Override example (before any `\registerauthor` calls):
-```latex
-\definecolor{cbBlue}{RGB}{30,90,170}
-```
-
-## Footnote Stream
-Comment footnotes use a separate `manyfoot` stream (alphabetic, tinted marker) so scholarly footnotes remain unaffected.
-
-## Customization Hooks
-- Redefine `\signature` to change superscript style.
-- Redefine palette colors prior to `\registerauthor`.
-- Wrap added text macros to layer further styling.
-
-## Robustness Notes
-- User-facing macros are robust (safe in section titles, captions).
-- Final mode removes comments cleanly (no stray spaces).
-
-## Minimal Example
+### TODO Lists
 
 ```latex
-\documentclass{article}
-\author{Alice A. Author}
-\usepackage[draft]{commenting}
-\registerauthor{alice}[Alice][cbBlue]
-\begin{document}
-An \alice{additional} clarification. \alicedel{old text}
-\alicei{Check phrasing.}
-\end{document}
+\begin{todolist}
+  \item Pending task
+  \item[\doing] In progress
+  \item[\done] Completed
+\end{todolist}
 ```
 
-## Example Output
+A `todo` author is pre-registered: `\todoi{Fix this.}`
 
-![Example Output](example.png)
+---
 
-See `example.tex` for a complete demonstration of all features.
+## Color Palette
 
-## Roadmap
-- Comment list / summary generator
-- Export comments to external JSON
-- Additional markup variants
+Ten colorblind-safe colors for accessibility:
+
+| Color | Name | Color | Name |
+|-------|------|-------|------|
+| 🔵 | `cbBlue` | 🟢 | `cbGreen` |
+| 🟠 | `cbOrange` | 🟡 | `cbYellow` |
+| 🔴 | `cbRed` | 🩷 | `cbPink` |
+| 🟣 | `cbPurple` | 🟤 | `cbBrown` |
+| 🩵 | `cbTeal` | ⚫ | `cbGray` |
+
+---
+
+## Package Options
+
+| Option | Effect |
+|--------|--------|
+| `draft` | Show all markup (default if document class is draft) |
+| `final` | Hide all markup (default if document class is final) |
+| `bg=sepia` | Apply sepia page background in draft mode |
+
+---
+
+## Documentation
+
+- **`example.tex`** — Quick one-page demo
+- **`documentation.tex`** — Complete feature walkthrough
+
+---
+
+## Requirements
+
+Standard TeX Live / MiKTeX packages: `xcolor`, `soul`, `hyperref`, `ulem`, `xparse`, `mdframed`, `manyfoot`, `marginnote`, `environ`
+
+Compatible with pdfLaTeX, XeLaTeX, and LuaLaTeX.
+
+---
+
+## Version History
+
+| Version | Date | Changes |
+|---------|------|---------|
+| 2.2 | 2025-11-26 | Sepia background, soul highlighting, documentation overhaul |
+| 2.1 | 2025-08-06 | Documentation improvements |
+| 2.0 | 2025-01-21 | Robust commands, xparse integration |
+
+---
 
 ## License
-MIT (see repository).
 
-## Changelog (Excerpt)
-- v2.1 Documentation improvements, clarified version metadata
-- v2.0 Refactor & robust command definitions
+MIT License — see [LICENSE](LICENSE)
+
+## Citation
+
+```bibtex
+@misc{commenting2025,
+  author = {Lee, Jae Hee},
+  title  = {commenting.sty: Collaborative annotation tools for LaTeX},
+  year   = {2025},
+  url    = {https://github.com/dschaehi/commenting.sty}
+}
+```

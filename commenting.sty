@@ -1,266 +1,451 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% commenting.sty (https://github.com/dschaehi/commenting.sty)
-%
-% Collaborative academic writing support:
-%   - Tracked author-tagged insertions
-%   - Inline (in-text) reviewer / author comments
-%   - Footnote-style comments (separate stream, alphabetic, colorized)
-%   - Multi-line inline & footnote comment environments
-%   - Author-colored block environments (highlighted paragraphs)
-%   - Draft / final mode switch (all markup suppressed in final)
-%   - Colorblind-safe palette (ten distinct hues)
-%   - Minimal keystroke cost: per-author macro namespace (\alice, \alicei, \alicef, etc.)
-%
-% Design goals:
-%   * Zero output artifacts in final mode
-%   * Robustness in moving arguments (footnotes / section titles) via \DeclareRobustCommand
-%   * Accessibility: palette chosen for distinguishability under common CVD types
-%   * Low coupling: no redefinition of LaTeX core user-facing macros
-%
-% Quick Start:
-%   \usepackage[draft]{commenting}
-%   \registerauthor{alice}[Alice][cbBlue]
-%   \registerauthor{bob}[Bob][cbOrange]
-%   Some \alice{added text}. \alicei{Inline note} \bobf{Footnote note}
-%
-% Generated per author X:
-%   \X{<text>}        Added text (colored + superscript signature in draft; plain in final)
-%   \Xdel{<text>}     Deleted text (colored strikethrough + signature in draft; hidden in final)
-%   \Xi{<comment>}    Inline comment (draft only)
-%   \Xf{<comment>}    Footnote comment (draft only, alphabetic marker)
-%   \begin{Xenv} ... \end{Xenv}    Colored paragraph environment (draft only margin signature)
-%   \begin{Xienv} ... \end{Xienv}  Multi-line inline comment (draft only)
-%   \begin{Xfenv} ... \end{Xfenv}  Multi-line footnote comment (draft only)
-%
-% Version History:
-%   v2.1 (2025/08/06)  Documentation improvements; metadata sync
-%   v2.0 (2025/01/21)  Refactor & robust command declarations
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%==============================================================================
+%%
+%%  commenting.sty — Collaborative Annotation Tools for LaTeX
+%%
+%%  Repository:  https://github.com/dschaehi/commenting.sty
+%%  Author:      Jae Hee Lee (http://jaeheelee.de)
+%%  License:     MIT
+%%
+%%==============================================================================
+%%
+%%  OVERVIEW
+%%  --------
+%%  This package provides a complete toolkit for collaborative academic writing
+%%  in LaTeX. It enables multiple authors to mark up documents with insertions,
+%%  deletions, and comments—all of which vanish cleanly in final mode.
+%%
+%%  KEY FEATURES
+%%  ------------
+%%    • Author-attributed text additions and deletions
+%%    • Inline comments with background highlighting
+%%    • Footnote comments with alphabetic markers and bidirectional hyperlinks
+%%    • Multi-line comment environments (inline boxes and footnotes)
+%%    • Colored block environments with margin signatures
+%%    • Automatic draft/final mode switching
+%%    • Colorblind-safe palette (10 distinct CVD-friendly colors)
+%%    • Optional sepia page background for comfortable draft reading
+%%
+%%  PACKAGE OPTIONS
+%%  ---------------
+%%    draft       Show all comments and markup (default if document is draft)
+%%    final       Suppress all annotations; produce clean output
+%%    bg=sepia    Apply sepia page background in draft mode
+%%
+%%  QUICK START
+%%  -----------
+%%    \usepackage[draft]{commenting}
+%%    \registerauthor{alice}[Alice][cbBlue]
+%%    \registerauthor{bob}[Bob][cbOrange]
+%%
+%%    Some text with \alice{an insertion}.
+%%    Here is \bobdel{deleted text}.
+%%    \alicei{An inline comment.}
+%%    \bobf{A footnote comment.}
+%%
+%%  COMMANDS GENERATED FOR EACH AUTHOR 'X'
+%%  --------------------------------------
+%%    \X{text}                  Inserted text (colored, superscript signature)
+%%    \Xdel{text}               Deleted text (strikethrough, signature)
+%%    \Xi{comment}              Inline comment (highlighted background)
+%%    \Xf{comment}              Footnote comment (alphabetic marker)
+%%    \begin{Xenv}...\end{Xenv}   Colored block with margin signature
+%%    \begin{Xienv}...\end{Xienv} Multi-line inline comment box
+%%    \begin{Xfenv}...\end{Xfenv} Multi-line footnote comment
+%%
+%%  VERSION HISTORY
+%%  ---------------
+%%    v2.2 (2025-11-26)  Complete refactor; improved documentation
+%%    v2.1 (2025-08-06)  Documentation improvements; metadata sync
+%%    v2.0 (2025-01-21)  Robust commands; xparse integration
+%%
+%%==============================================================================
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{commenting}[2025/08/06 v2.1 by Jae Hee Lee (http://jaeheelee.de)]
+\ProvidesPackage{commenting}[2025/11/26 v2.2 Collaborative annotation tools for LaTeX]
 
-% Package options and draft mode handling
+%%==============================================================================
+%%  SECTION 1: PACKAGE OPTIONS AND CONFIGURATION
+%%==============================================================================
+
 \RequirePackage{ifthen}
+
+%% --- Boolean Flags ---
+%% isDraft: when true, all annotations are visible; when false, they vanish
+%% useBackground: when true (and draft), applies a page background color
+
 \newboolean{isDraft}
 \newboolean{useBackground}
-\setboolean{useBackground}{false}  % Default: no background
-\def\bgColor{white}  % Default background color for mixing
+\setboolean{useBackground}{false}
 
-% First set default based on document class
-\@ifclasswith{article}{draft}{\setboolean{isDraft}{true}}{\setboolean{isDraft}{false}}
+%% --- Default Background Color ---
+%% Used for color mixing in highlights. Defaults to white (invisible).
 
-% Then let package options override
+\def\bgColor{white}
+
+%% --- Inherit Draft Status from Document Class ---
+%% If the article class was loaded with 'draft', enable draft mode automatically.
+
+\@ifclasswith{article}{draft}{%
+  \setboolean{isDraft}{true}%
+}{%
+  \setboolean{isDraft}{false}%
+}
+
+%% --- Declare Package Options ---
+
 \DeclareOption{draft}{\setboolean{isDraft}{true}}
 \DeclareOption{final}{\setboolean{isDraft}{false}}
-\DeclareOption{bg=sepia}{\setboolean{useBackground}{true}\def\bgColor{commentingSepia}}
+\DeclareOption{bg=sepia}{%
+  \setboolean{useBackground}{true}%
+  \def\bgColor{commentingSepia}%
+}
 \ProcessOptions\relax
 
+%%==============================================================================
+%%  SECTION 2: REQUIRED PACKAGES
+%%==============================================================================
 
-% Required packages
-\RequirePackage[T1]{fontenc}          % For proper font encoding
-\RequirePackage[ruled,perpage]{manyfoot} % For multiple footnote styles
-\RequirePackage{xcolor}               % For colored text
-\RequirePackage{soul}                 % For highlighting with \hl
-\RequirePackage{hyperref}             % For hyperlinks
-\AtEndPreamble{\hypersetup{draft=false}} % Disable hyperref draft mode and link borders
-\RequirePackage[normalem]{ulem}       % For strikethrough (normalem preserves \emph)
+\RequirePackage[T1]{fontenc}              % Modern font encoding
+\RequirePackage[ruled,perpage]{manyfoot}  % Multiple footnote streams
+\RequirePackage{xcolor}                   % Color support
+\RequirePackage{soul}                     % Text highlighting (\hl)
+\RequirePackage{hyperref}                 % Hyperlinks for footnote backlinks
+\RequirePackage[normalem]{ulem}           % Strikethrough (\sout), preserves \emph
+\RequirePackage{xparse}                   % Modern command definition
+\RequirePackage{etoolbox}                 % LaTeX programming utilities
+\RequirePackage{environ}                  % Capture environment body (\BODY)
+\RequirePackage{graphicx}                 % Image handling
+\RequirePackage{marginnote}               % Margin notes for signatures
+\RequirePackage{mdframed}                 % Framed boxes for comment environments
 
-% Required packages for optional arguments and hooks
-\RequirePackage{xparse}
-\RequirePackage{etoolbox}
-\RequirePackage{environ}              % For capturing environment content
-\RequirePackage{graphicx}
-\RequirePackage{marginnote}           % For margin notes (works better in two-column)
-\RequirePackage{mdframed}
-\ifthenelse{\boolean{isDraft}}{\setkeys{Gin}{draft=false}}
+%% --- Package Configuration ---
 
-% Configure soul to handle font commands
+% Ensure hyperlinks remain active even in draft document class
+\AtEndPreamble{\hypersetup{draft=false}}
+
+% Keep images visible in draft mode (override graphicx draft behavior)
+\ifthenelse{\boolean{isDraft}}{%
+  \setkeys{Gin}{draft=false}%
+}{}
+
+% Register font commands with soul for proper highlighting
 \soulregister{\scriptsize}{1}
 \soulregister{\textsf}{1}
 
-% Extract first author from \author command
+%%==============================================================================
+%%  SECTION 3: COLORBLIND-SAFE PALETTE
+%%==============================================================================
+%%
+%%  Ten distinct colors optimized for color vision deficiency (CVD).
+%%  Based on ColorBrewer research for maximum distinguishability.
+
+\definecolor{cbBlue}{RGB}{51,114,189}     % Primary blue
+\definecolor{cbOrange}{RGB}{255,127,42}   % Vivid orange
+\definecolor{cbTeal}{RGB}{64,204,204}     % Cyan-teal
+\definecolor{cbRed}{RGB}{217,37,37}       % Alert red (default author color)
+\definecolor{cbPurple}{RGB}{148,103,189}  % Muted purple
+\definecolor{cbGreen}{RGB}{0,158,115}     % Accessible green
+\definecolor{cbYellow}{RGB}{240,228,66}   % High-visibility yellow
+\definecolor{cbPink}{RGB}{204,121,167}    % Soft pink
+\definecolor{cbBrown}{RGB}{146,73,0}      % Warm brown
+\definecolor{cbGray}{RGB}{128,128,128}    % Neutral gray
+
+%% --- Background Color for Sepia Option ---
+
+\definecolor{commentingSepia}{HTML}{EDE7DA}
+
+%%==============================================================================
+%%  SECTION 4: UTILITY MACROS
+%%==============================================================================
+
+%% --- Extract First Author Name ---
+%% If \author is defined, extracts the first word for use as default display name.
+
 \newcommand{\getfirstauthor}{%
-	\ifcsname @author\endcsname
-		\expandafter\getfirstauthorhelper\expandafter{\@author}%
-	\else
-		% Empty if \author is undefined
-		{}%
-	\fi
+  \ifcsname @author\endcsname
+    \expandafter\getfirstauthorhelper\expandafter{\@author}%
+  \else
+    {}%
+  \fi
 }
-\newcommand{\getfirstauthorhelper}[1]{%
-	\expandafter\getfirstword#1 \@nil
-}
+\newcommand{\getfirstauthorhelper}[1]{\expandafter\getfirstword#1 \@nil}
 \def\getfirstword#1 #2\@nil{#1}
 
-% Colorblind-safe color palette
-% These colors are chosen for maximum distinguishability for all types of color vision
-% Source: Based on ColorBrewer and research on colorblind-safe palettes
-\definecolor{cbBlue}{RGB}{51,114,189}       % Strong blue
-\definecolor{cbOrange}{RGB}{255,127,42}     % Vivid orange
-\definecolor{cbTeal}{RGB}{64,204,204}       % Bright teal
-\definecolor{cbRed}{RGB}{217,37,37}         % Clear red
-\definecolor{cbPurple}{RGB}{148,103,189}    % Muted purple
-\definecolor{cbGreen}{RGB}{0,158,115}       % Bright green
-\definecolor{cbYellow}{RGB}{240,228,66}     % Vivid yellow
-\definecolor{cbPink}{RGB}{204,121,167}      % Soft pink
-\definecolor{cbBrown}{RGB}{146,73,0}        % Warm brown
-\definecolor{cbGray}{RGB}{128,128,128}      % Neutral gray
-\definecolor{commentingSepia}{HTML}{EDE7DA} % Sepia background for draft mode
+%% --- Author Signature Format ---
+%% Renders author names in sans-serif for visual distinction.
 
-% Define signature command for author identification
-\newcommand{\signature}[1]{{\scriptsize\textsf{#1}}}
+\newcommand{\signature}[1]{{\textsf{#1}}}
 
-% Setup custom footnote style with alphabetic symbols in red
+%%==============================================================================
+%%  SECTION 5: FOOTNOTE COMMENT INFRASTRUCTURE
+%%==============================================================================
+%%
+%%  Uses manyfoot to create a separate footnote stream with alphabetic markers.
+%%  Hyperref integration provides clickable backlinks from footnote to text.
+
+%% --- Declare Custom Footnote Stream ---
+
 \DeclareNewFootnote{A}[fnsymbol]
 \renewcommand{\thefootnoteA}{\textcolor{red}{\alph{footnoteA}}}
 
-% Counter for footnote backlinks
+%% --- Backlink Counter ---
+%% Tracks footnote positions for bidirectional navigation.
+
 \newcounter{footnotebacklink}
 
-% Fix hyperref compatibility with manyfoot and add backlink support
+%% --- Enhanced Footnote with Hyperlinks ---
+%% Creates clickable markers: click footnote marker to jump back to source.
+
 \@ifpackageloaded{hyperref}{%
-	\renewcommand{\footnoteA}[1]{%
-		\stepcounter{footnoteA}%
-        \stepcounter{footnotebacklink}%
-		\protected@xdef\@thefnmark{\thefootnoteA}%
-		\hyper@makecurrent{footnoteA}%
-        % Create hypertarget at the point where footnote is called
-        \edef\@currentbacklink{footnotebacklink.\thefootnotebacklink}%
-        \hypertarget{\@currentbacklink}{}%
-		\@footnotemark%
-        % Add footnote text with clickable marker
-        \begingroup
-        \protected@xdef\@thefnmark{%
-            \protect\hyperlink{\@currentbacklink}{\thefootnoteA}%
-        }%
-		\@footnotetext{#1}%
-        \endgroup
-	}%
+  \renewcommand{\footnoteA}[1]{%
+    \stepcounter{footnoteA}%
+    \stepcounter{footnotebacklink}%
+    \protected@xdef\@thefnmark{\thefootnoteA}%
+    \hyper@makecurrent{footnoteA}%
+    % Anchor at call site for backlink
+    \edef\@currentbacklink{footnotebacklink.\thefootnotebacklink}%
+    \hypertarget{\@currentbacklink}{}%
+    \@footnotemark%
+    % Footnote text with backlink
+    \begingroup
+      \protected@xdef\@thefnmark{%
+        \protect\hyperlink{\@currentbacklink}{\thefootnoteA}%
+      }%
+      \@footnotetext{#1}%
+    \endgroup
+  }%
 }{}
 
-% Command for footnote-style comments
-% Args: #1=author identifier, #2=color, #3=comment text
+%%==============================================================================
+%%  SECTION 6: CORE ANNOTATION COMMANDS
+%%==============================================================================
+
+%% --- Footnote Comment ---
+%% Creates a footnote with author signature. Visible only in draft mode.
+%% Args: #1=author name, #2=color, #3=comment text
+
 \newcommand{\footnotecommentFragile}[3]{%
-	\ifthenelse{\boolean{isDraft}}%
-	{\protect{\color{#2}\footnoteA{\color{#2}\signature{#1}: \guillemotright#3\guillemotleft}}}%
-	{}%
+  \ifthenelse{\boolean{isDraft}}{%
+    \protect{\footnoteA{\color{#2}{\signature{#1}}: #3}}%
+  }{}%
 }
 \DeclareRobustCommand{\footnotecomment}[3]{\footnotecommentFragile{#1}{#2}{#3}}
 
-% Command for inline comments with highlighting
-% Args: #1=author identifier, #2=color, #3=comment text
+%% --- Inline Comment ---
+%% Highlighted text with author signature. Visible only in draft mode.
+%% Uses soul's \hl with color mixing against background.
+%% Args: #1=author name, #2=color, #3=comment text
+
 \newcommand{\inlinecommentFragile}[3]{%
-	\ifthenelse{\boolean{isDraft}}%
-	{{\leavevmode\small\color{#2}\sethlcolor{#2!3!\bgColor}\hl{[{\scriptsize\textsf{#1}}: #3]}}}{}%	
+  \ifthenelse{\boolean{isDraft}}{%
+    \leavevmode{%
+      \small\color{#2}%
+      \sethlcolor{#2!10!\bgColor}%
+      \hl{\mbox{\signature{#1}}: \small#3}%
+    }%
+  }{}%
 }
 \DeclareRobustCommand{\inlinecomment}[3]{\inlinecommentFragile{#1}{#2}{#3}}
 
+%% --- Added Text ---
+%% Marks inserted text with author color and superscript signature.
+%% Text remains visible in final mode (without markup).
+%% Args: #1=author name, #2=color, #3=text
 
-% Command for added text with author attribution
-% Args: #1=author identifier, #2=color, #3=added text
 \newcommand{\addedFragile}[3]{{%
-			\ifthenelse{\boolean{isDraft}}
-			{\leavevmode\color{#2}#3\signature{#1}}
-			{#3}}%
-}
+  \ifthenelse{\boolean{isDraft}}{%
+    \leavevmode\color{#2}#3\textsuperscript{\signature{#1}}%
+  }{%
+    #3%
+  }%
+}}
 \DeclareRobustCommand{\added}[3]{\addedFragile{#1}{#2}{#3}}
 
-% Command for deleted text with author attribution
-% Args: #1=author identifier, #2=color, #3=deleted text
+%% --- Deleted Text ---
+%% Marks removed text with strikethrough and author signature.
+%% Completely hidden in final mode.
+%% Args: #1=author name, #2=color, #3=text
+
 \newcommand{\deletedFragile}[3]{{%
-            \ifthenelse{\boolean{isDraft}}
-            {\leavevmode\color{black!30!white}\sout{#3}\signature{#1}}
-            {}}%
-}
+  \ifthenelse{\boolean{isDraft}}{%
+    \leavevmode\color{#2}\sout{#3}\textsuperscript{\signature{#1}}%
+  }{}%
+}}
 \DeclareRobustCommand{\deleted}[3]{\deletedFragile{#1}{#2}{#3}}
 
+%%==============================================================================
+%%  SECTION 7: BLOCK ENVIRONMENTS
+%%==============================================================================
 
-% Environment for colored text blocks with margin notes
-% Args: #1=color, #2=author identifier
-\newenvironment{colored}[2]
-{\ifthenelse{\boolean{isDraft}}{\color{#1}\marginnote{\vspace*{-\baselineskip}\signature{#2}}}{}}
-{\ifthenelse{\boolean{isDraft}}{}{}}
+%% --- Colored Block Environment ---
+%% Wraps content in author color with margin signature.
+%% Args: #1=color, #2=author name
 
-
-
-% Register a new author with associated commands
-% Args:
-% #1 (mandatory) = command identifier (e.g., alice for \alice commands)
-% [#2] (optional) = display name (defaults to first word in \author or empty)
-% [#3] (optional) = color name (defaults to cbRed)
-\NewDocumentCommand{\registerauthor}{m o o}{%
-	% Create author-specific variables to avoid overwrites
-	% Get author name - use optional arg if provided, else first author, else empty
-	\IfNoValueTF{#2}
-	{\expandafter\def\csname displayname@#1\endcsname{\getfirstauthor}}
-	{\expandafter\def\csname displayname@#1\endcsname{#2}}%
-
-	% Get color - use optional arg if provided, else cbRed
-	\IfNoValueTF{#3}
-	{\expandafter\def\csname authorcolor@#1\endcsname{cbRed}}
-	{\expandafter\def\csname authorcolor@#1\endcsname{#3}}%
-
-	% Define color using author-specific color name
-	\expandafter\definecolor{color#1}{named}{\csname authorcolor@#1\endcsname}%
-
-	% Define commands using command identifier and author-specific display name
-	\expandafter\newcommand\csname #1i\endcsname[1]{%
-		\inlinecomment{\csname displayname@#1\endcsname}{color#1}{##1}}%
-	\expandafter\newcommand\csname #1f\endcsname[1]{%
-		\footnotecomment{\csname displayname@#1\endcsname}{color#1}{##1}}%
-	\expandafter\newcommand\csname #1\endcsname[1]{%
-		\added{\csname displayname@#1\endcsname}{color#1}{##1}}%
-    \expandafter\newcommand\csname #1del\endcsname[1]{%
-        \deleted{\csname displayname@#1\endcsname}{color#1}{##1}}%
-	\expandafter\newenvironment{#1env}{%
-		\begin{colored}{color#1}{\csname displayname@#1\endcsname}}%
-			{\end{colored}}%
-
-	% Add environment versions of inline and footnote comments
-	% We need to use \csname and \endcsname correctly with NewEnviron
-	\expandafter\newcommand\expandafter{\csname create#1ienv\endcsname}{%
-		\NewEnviron{#1ienv}{%
-			\ifthenelse{\boolean{isDraft}}%
-			{
-				\begin{mdframed}[linewidth=1.5pt,linecolor=color#1,topline=false,leftline=true,rightline=false,bottomline=false,backgroundcolor=color#1!3!\bgColor]
-					\color{color#1}\marginnote{\vspace*{-\baselineskip}\signature{\csname displayname@#1\endcsname}}\noindent{\small\leavevmode\color{color#1}\BODY}
-				\end{mdframed}
-			}%
-			{}% In final mode, discard content
-		}[]%
-	}%
-	\csname create#1ienv\endcsname
-
-	\expandafter\newcommand\expandafter{\csname create#1fenv\endcsname}{%
-		\NewEnviron{#1fenv}{%
-			\ifthenelse{\boolean{isDraft}}%
-			{\footnoteA{\color{color#1}\guillemotright\BODY\guillemotleft\signature{\csname displayname@#1\endcsname}}}%
-			{}% In final mode, discard content
-		}[]%
-	}%
-	\csname create#1fenv\endcsname
+\newenvironment{colored}[2]{%
+  \ifthenelse{\boolean{isDraft}}{%
+    \color{#1}%
+    \marginnote{\vspace*{-\baselineskip}\signature{#2}}%
+  }{}%
+}{%
+  % No special cleanup needed
 }
 
+%%==============================================================================
+%%  SECTION 8: AUTHOR REGISTRATION
+%%==============================================================================
+%%
+%%  The \registerauthor command creates a complete command suite for an author.
+%%
+%%  Usage:
+%%    \registerauthor{id}[Display Name][color]
+%%
+%%  Arguments:
+%%    #1 (required) - Command identifier (e.g., 'alice' -> \alice, \alicei, etc.)
+%%    #2 (optional) - Display name shown in signatures (default: first word of \author)
+%%    #3 (optional) - Color from palette (default: cbRed)
+%%
+%%  Generated Commands:
+%%    \X{text}        Added text with attribution
+%%    \Xdel{text}     Deleted text with strikethrough
+%%    \Xi{comment}    Inline highlighted comment
+%%    \Xf{comment}    Footnote comment
+%%
+%%  Generated Environments:
+%%    Xenv            Colored block with margin signature
+%%    Xienv           Multi-line inline comment box
+%%    Xfenv           Multi-line footnote comment
 
-% todolist environment for tracking tasks
+\NewDocumentCommand{\registerauthor}{m o o}{%
+  %% --- Store Display Name ---
+  \IfNoValueTF{#2}{%
+    \expandafter\def\csname displayname@#1\endcsname{\getfirstauthor}%
+  }{%
+    \expandafter\def\csname displayname@#1\endcsname{#2}%
+  }%
+  
+  %% --- Store Color ---
+  \IfNoValueTF{#3}{%
+    \expandafter\def\csname authorcolor@#1\endcsname{cbRed}%
+  }{%
+    \expandafter\def\csname authorcolor@#1\endcsname{#3}%
+  }%
+  
+  %% --- Define Author-Specific Color Alias ---
+  \expandafter\definecolor{color#1}{named}{\csname authorcolor@#1\endcsname}%
+  
+  %% --- Define Core Commands ---
+  
+  % \X{text} - Added text
+  \expandafter\newcommand\csname #1\endcsname[1]{%
+    \added{\csname displayname@#1\endcsname}{color#1}{##1}%
+  }%
+  
+  % \Xdel{text} - Deleted text
+  \expandafter\newcommand\csname #1del\endcsname[1]{%
+    \deleted{\csname displayname@#1\endcsname}{color#1}{##1}%
+  }%
+  
+  % \Xi{comment} - Inline comment
+  \expandafter\newcommand\csname #1i\endcsname[1]{%
+    \inlinecomment{\csname displayname@#1\endcsname}{color#1}{##1}%
+  }%
+  
+  % \Xf{comment} - Footnote comment
+  \expandafter\newcommand\csname #1f\endcsname[1]{%
+    \footnotecomment{\csname displayname@#1\endcsname}{color#1}{##1}%
+  }%
+  
+  %% --- Define Colored Block Environment (Xenv) ---
+  \expandafter\newenvironment{#1env}{%
+    \begin{colored}{color#1}{\csname displayname@#1\endcsname}%
+  }{%
+    \end{colored}%
+  }%
+  
+  %% --- Define Multi-Line Inline Comment Environment (Xienv) ---
+  %% Uses mdframed for a colored box with margin signature.
+  \expandafter\newcommand\expandafter{\csname create#1ienv\endcsname}{%
+    \NewEnviron{#1ienv}{%
+      \ifthenelse{\boolean{isDraft}}{%
+        \begin{mdframed}[%
+          linewidth=1.5pt,%
+          linecolor=color#1,%
+          topline=false,%
+          leftline=false,%
+          rightline=false,%
+          bottomline=false,%
+          backgroundcolor=color#1!10!\bgColor%
+        ]
+          \color{color#1}%
+          \marginnote{\vspace*{-\baselineskip}\signature{\csname displayname@#1\endcsname}}%
+          \noindent\small\BODY
+        \end{mdframed}%
+      }{}%
+    }[]%
+  }%
+  \csname create#1ienv\endcsname
+  
+  %% --- Define Multi-Line Footnote Comment Environment (Xfenv) ---
+  \expandafter\newcommand\expandafter{\csname create#1fenv\endcsname}{%
+    \NewEnviron{#1fenv}{%
+      \ifthenelse{\boolean{isDraft}}{%
+        \footnoteA{\color{color#1}{\signature{\csname displayname@#1\endcsname}}: \BODY}%
+      }{}%
+    }[]%
+  }%
+  \csname create#1fenv\endcsname
+}
+
+%%==============================================================================
+%%  SECTION 9: TODO LIST SUPPORT
+%%==============================================================================
+%%
+%%  Provides a checkbox-style list environment for tracking tasks.
+%%
+%%  Usage:
+%%    \begin{todolist}
+%%      \item Incomplete task
+%%      \item[\doing] In-progress task
+%%      \item[\done] Completed task
+%%    \end{todolist}
+
 \RequirePackage{amssymb}
 \RequirePackage{enumitem}
+\RequirePackage{pifont}
+
 \newlist{todolist}{itemize}{2}
 \setlist[todolist]{label=$\square$}
-\RequirePackage{pifont}
-\newcommand{\done}{\rlap{\raisebox{0.2ex}{\hspace{0.3ex}{\scriptsize \ding{56}}}}$\square$}
-\newcommand{\doing}{\rlap{\raisebox{0.2ex}{\hspace{0.5ex}$\cdot$}}$\square$}
 
+%% Checkbox symbols
+\newcommand{\done}{%
+  \rlap{\raisebox{0.2ex}{\hspace{0.3ex}{\scriptsize\ding{56}}}}$\square$%
+}
+\newcommand{\doing}{%
+  \rlap{\raisebox{0.2ex}{\hspace{0.5ex}$\cdot$}}$\square$%
+}
+
+%% Pre-registered 'todo' author for quick TODO markers
 \registerauthor{todo}[TODO][cbRed]
 
+%%==============================================================================
+%%  SECTION 10: DRAFT MODE SETTINGS
+%%==============================================================================
+
 \RequirePackage{ifdraft}
-\ifdraft{
-	\ifthenelse{\boolean{useBackground}}{
-		\RequirePackage{pagecolor}
-		\pagecolor{\bgColor}
-		\color{black}
-	}{}
-	\hbadness=99999  % or any number >=10000
-	\vbadness=99999  % or any number >=10000
+
+\ifdraft{%
+  %% Apply page background color if bg=sepia was specified
+  \ifthenelse{\boolean{useBackground}}{%
+    \RequirePackage{pagecolor}%
+    \pagecolor{\bgColor}%
+    \color{black}%
+  }{}%
+  
+  %% Suppress box warnings to reduce console noise during drafting
+  \hbadness=99999
+  \vbadness=99999
 }{}
+
+%%==============================================================================
+%%  END OF PACKAGE
+%%==============================================================================

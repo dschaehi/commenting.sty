@@ -1,0 +1,372 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%  example.tex — Feature Walkthrough for commenting.sty
+%
+%  This document demonstrates all features of the commenting.sty package.
+%  Compile with: pdflatex example.tex
+%
+%  Try changing [draft] to [final] to see how annotations disappear cleanly.
+%  Try adding bg=sepia option to see the sepia background: [draft,bg=sepia]
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[11pt,draft]{article}
+
+%% Page setup
+\usepackage[margin=1in]{geometry}
+\usepackage{parskip}          % Paragraph spacing instead of indentation
+\usepackage{booktabs}         % Nice tables
+\usepackage{lipsum}           % Dummy text for demonstrations
+
+%% Load commenting package
+%% Options: draft (show comments), final (hide comments), bg=sepia (background)
+\usepackage[draft]{commenting}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  AUTHOR REGISTRATION
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%  Syntax: \registerauthor{id}[Display Name][color]
+%
+%  Available colors (colorblind-safe):
+%    cbBlue, cbOrange, cbTeal, cbRed, cbPurple,
+%    cbGreen, cbYellow, cbPink, cbBrown, cbGray
+%
+%  This creates commands: \id, \iddel, \idi, \idf
+%  And environments: idenv, idienv, idfenv
+
+\registerauthor{alice}[Alice][cbBlue]
+\registerauthor{bob}[Bob][cbOrange]
+\registerauthor{carol}[Carol][cbGreen]
+\registerauthor{dave}[Dave][cbPurple]
+
+%% Note: 'todo' is pre-registered with [TODO][cbRed]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title{\texttt{commenting.sty} v2.2\\[0.5ex]
+       \large Feature Walkthrough}
+\author{Collaborative LaTeX Annotation Package}
+\date{November 2025}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This document demonstrates all features of the \texttt{commenting.sty} package
+for collaborative academic writing. Each section showcases a different feature
+with explanations and examples. Change \texttt{[draft]} to \texttt{[final]} in
+the package options to see how all annotations vanish cleanly.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Quick Start}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+After loading the package and registering authors, you can immediately start
+annotating:
+
+\begin{verbatim}
+\usepackage[draft]{commenting}
+\registerauthor{alice}[Alice][cbBlue]
+
+Some text with \alice{an insertion} here.
+\end{verbatim}
+
+\noindent Result: Some text with \alice{an insertion} here.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Text Additions and Deletions}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Added Text: \texttt{\textbackslash author\{text\}}}
+
+Mark new text contributions with the author command. The text appears in the
+author's color with a superscript signature:
+
+\begin{itemize}
+  \item \alice{Alice added this text.}
+  \item \bob{Bob contributed this part.}
+  \item \carol{Carol wrote this section.}
+  \item \dave{Dave inserted this content.}
+\end{itemize}
+
+In \textbf{final mode}, the text remains but colors and signatures disappear.
+
+\subsection{Deleted Text: \texttt{\textbackslash authordel\{text\}}}
+
+Mark text for deletion with strikethrough formatting:
+
+\begin{itemize}
+  \item Original sentence \alicedel{with removed words} continues here.
+  \item The \bobdel{unnecessary} method was simplified.
+  \item We \caroldel{completely} revised the approach.
+\end{itemize}
+
+In \textbf{final mode}, deleted text vanishes entirely.
+
+\subsection{Combining Additions and Deletions}
+
+Track revisions by combining both commands:
+
+The \bobdel{old algorithm}\bob{new method} performs \alicedel{poorly}\alice{efficiently} on large datasets.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Inline Comments}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Short Inline Comments: \texttt{\textbackslash authori\{comment\}}}
+
+Inline comments appear directly in the text with highlighted backgrounds:
+
+This paragraph needs work.\alicei{Consider restructuring this section.}
+The methodology is sound,\bobi{Add more details here.} but the results
+section\caroli{Missing statistical significance tests.} requires expansion.
+
+Inline comments are ideal for:
+\begin{itemize}
+  \item Quick suggestions
+  \item Marking areas needing attention
+  \item Short questions or clarifications
+\end{itemize}
+
+In \textbf{final mode}, all inline comments disappear completely.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Footnote Comments}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Short Footnote Comments: \texttt{\textbackslash authorf\{comment\}}}
+
+For longer comments that would disrupt reading flow, use footnotes:
+
+The experiment was conducted over six months\alicef{We should mention the
+specific dates and any interruptions that occurred during this period.} with
+careful monitoring of all variables\bobf{Consider adding a table summarizing
+the monitored variables and their acceptable ranges.}.
+
+Footnote comments feature:
+\begin{itemize}
+  \item Alphabetic markers (a, b, c, ...) to distinguish from regular footnotes
+  \item Clickable backlinks (click the marker in the footnote to return)
+  \item Author-colored text for easy identification
+\end{itemize}
+
+\subsection{Comparison: Inline vs. Footnote}
+
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Feature} & \textbf{Inline} (\texttt{\textbackslash Xi}) & \textbf{Footnote} (\texttt{\textbackslash Xf}) \\
+\midrule
+Visibility & In-text & Page bottom \\
+Best for & Short notes & Long explanations \\
+Reading flow & Interrupts slightly & Preserves flow \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Multi-line Comment Environments}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Multi-line Inline: \texttt{authorienv}}
+
+For extended inline discussions, use the \texttt{ienv} environment:
+
+\begin{aliceienv}
+This is a multi-line inline comment that spans several lines.
+It's perfect for detailed suggestions, extended discussions,
+or when you need to explain a complex revision proposal.
+
+The comment appears in a colored box with the author's signature
+in the margin, making it easy to identify at a glance.
+\end{aliceienv}
+
+Here is how Bob might respond:
+
+\begin{bobienv}
+I agree with Alice's suggestion above. We should also consider
+the implications for Section 5, which relies heavily on the
+assumptions made here.
+\end{bobienv}
+
+\subsection{Multi-line Footnote: \texttt{authorfenv}}
+
+For lengthy footnote discussions that don't fit in a single line:
+
+The theoretical framework builds on previous work%
+\begin{alicefenv}
+This entire paragraph needs citations. Key references include:
+Smith (2020) for the foundational theory,
+Jones (2021) for the methodological approach,
+and Brown (2022) for the statistical validation.
+\end{alicefenv}
+and extends it to new domains.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Colored Block Environments}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Author Blocks: \texttt{authorenv}}
+
+Mark entire paragraphs as contributions from a specific author:
+
+\begin{aliceenv}
+This paragraph was written entirely by Alice. The colored text and margin
+signature clearly identify the author. This is useful for tracking who wrote
+which sections during collaborative editing, or for marking sections that are
+under review.
+\end{aliceenv}
+
+\begin{bobenv}
+Bob's contribution follows here. Notice how each author's block uses their
+assigned color from the colorblind-safe palette. This ensures that all
+collaborators, including those with color vision deficiency, can distinguish
+between different authors' contributions.
+\end{bobenv}
+
+\begin{carolenv}
+Carol adds her section here. The margin signatures make it easy to scan the
+document and quickly identify who wrote what, even when printing in grayscale.
+\end{carolenv}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{TODO Lists}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The package includes a \texttt{todolist} environment with checkbox symbols:
+
+\begin{todolist}
+  \item Write introduction
+  \item[\doing] Revise methodology section
+  \item[\done] Complete literature review
+  \item Run additional experiments
+  \item[\done] Update figures
+\end{todolist}
+
+Checkbox commands:
+\begin{itemize}
+  \item Default: empty checkbox ($\square$)
+  \item \texttt{\textbackslash doing}: in-progress marker
+  \item \texttt{\textbackslash done}: completed marker
+\end{itemize}
+
+\subsection{Pre-registered TODO Author}
+
+The package pre-registers a \texttt{todo} author for quick task marking:
+
+This section is incomplete.\todoi{Add experimental results here.}
+
+The algorithm needs optimization.\todof{Benchmark against baseline methods
+and report timing comparisons in Table 3.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Colorblind-Safe Palette}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The package provides 10 colors optimized for color vision deficiency (CVD):
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{Color Name} & \textbf{Sample} \\
+\midrule
+\texttt{cbBlue}   & \textcolor{cbBlue}{Sample text in blue} \\
+\texttt{cbOrange} & \textcolor{cbOrange}{Sample text in orange} \\
+\texttt{cbTeal}   & \textcolor{cbTeal}{Sample text in teal} \\
+\texttt{cbRed}    & \textcolor{cbRed}{Sample text in red} \\
+\texttt{cbPurple} & \textcolor{cbPurple}{Sample text in purple} \\
+\texttt{cbGreen}  & \textcolor{cbGreen}{Sample text in green} \\
+\texttt{cbYellow} & \textcolor{cbYellow}{Sample text in yellow} \\
+\texttt{cbPink}   & \textcolor{cbPink}{Sample text in pink} \\
+\texttt{cbBrown}  & \textcolor{cbBrown}{Sample text in brown} \\
+\texttt{cbGray}   & \textcolor{cbGray}{Sample text in gray} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Package Options}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Draft vs. Final Mode}
+
+\begin{verbatim}
+\usepackage[draft]{commenting}  % Show all annotations
+\usepackage[final]{commenting}  % Hide all annotations
+\end{verbatim}
+
+The package also inherits the document class option:
+\begin{verbatim}
+\documentclass[draft]{article}  % commenting.sty uses draft mode
+\documentclass[final]{article}  % commenting.sty uses final mode
+\end{verbatim}
+
+\subsection{Sepia Background}
+
+For comfortable reading during long editing sessions:
+\begin{verbatim}
+\usepackage[draft,bg=sepia]{commenting}
+\end{verbatim}
+
+This applies a warm sepia tone to the page background in draft mode.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Complete Example: Collaborative Revision}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Here's a realistic example showing how multiple authors might collaborate:
+
+\begin{aliceenv}
+The proposed method achieves \alice{state-of-the-art} results on
+\alicedel{all}\alice{most} benchmark datasets.\alicei{Need to verify the claim
+on Dataset X.} Our implementation\alicef{Code will be released upon
+publication at github.com/example/project.} demonstrates significant
+improvements over \bobdel{existing}\bob{previous} approaches.
+\end{aliceenv}
+
+\begin{bobienv}
+I've reviewed Alice's revisions above. The claim about ``state-of-the-art''
+may be too strong---we should qualify it or provide supporting evidence
+from our ablation studies.
+\end{bobienv}
+
+\begin{carolfenv}
+Agreed with Bob. I'll add the ablation study results to Table 2 and update
+the claims accordingly. Also, we need to address Reviewer 2's concern about
+computational complexity.
+\end{carolfenv}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Summary of Commands}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+For each registered author \texttt{X}:
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+\textbf{Command/Environment} & \textbf{Purpose} & \textbf{Final Mode} \\
+\midrule
+\texttt{\textbackslash X\{text\}}           & Added text        & Text remains \\
+\texttt{\textbackslash Xdel\{text\}}        & Deleted text      & Text removed \\
+\texttt{\textbackslash Xi\{comment\}}       & Inline comment    & Hidden \\
+\texttt{\textbackslash Xf\{comment\}}       & Footnote comment  & Hidden \\
+\texttt{Xenv}                               & Colored block     & Plain text \\
+\texttt{Xienv}                              & Multi-line inline & Hidden \\
+\texttt{Xfenv}                              & Multi-line footnote & Hidden \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vfill
+\begin{center}
+\rule{0.5\textwidth}{0.4pt}\\[1ex]
+\textit{End of feature walkthrough}
+\end{center}
+
+\end{document}
