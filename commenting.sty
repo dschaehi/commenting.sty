@@ -57,6 +57,7 @@
 \RequirePackage[T1]{fontenc}          % For proper font encoding
 \RequirePackage[ruled,perpage]{manyfoot} % For multiple footnote styles
 \RequirePackage{xcolor}               % For colored text
+\RequirePackage{soul}                 % For highlighting with \hl
 \RequirePackage{hyperref}             % For hyperlinks
 \AtEndPreamble{\hypersetup{draft=false}} % Disable hyperref draft mode and link borders
 \RequirePackage[normalem]{ulem}       % For strikethrough (normalem preserves \emph)
@@ -66,19 +67,25 @@
 \RequirePackage{etoolbox}
 \RequirePackage{environ}              % For capturing environment content
 \RequirePackage{graphicx}
+\RequirePackage{marginnote}           % For margin notes (works better in two-column)
+\RequirePackage{mdframed}
 \ifthenelse{\boolean{isDraft}}{\setkeys{Gin}{draft=false}}
+
+% Configure soul to handle font commands
+\soulregister{\scriptsize}{1}
+\soulregister{\textsf}{1}
 
 % Extract first author from \author command
 \newcommand{\getfirstauthor}{%
-    \ifcsname @author\endcsname
-        \expandafter\getfirstauthorhelper\expandafter{\@author}%
-    \else
-        % Empty if \author is undefined
-        {}%
-    \fi
+	\ifcsname @author\endcsname
+		\expandafter\getfirstauthorhelper\expandafter{\@author}%
+	\else
+		% Empty if \author is undefined
+		{}%
+	\fi
 }
 \newcommand{\getfirstauthorhelper}[1]{%
-    \expandafter\getfirstword#1 \@nil
+	\expandafter\getfirstword#1 \@nil
 }
 \def\getfirstword#1 #2\@nil{#1}
 
@@ -95,9 +102,10 @@
 \definecolor{cbPink}{RGB}{204,121,167}      % Soft pink
 \definecolor{cbBrown}{RGB}{146,73,0}        % Warm brown
 \definecolor{cbGray}{RGB}{128,128,128}      % Neutral gray
+\definecolor{MySepia}{HTML}{EDE7DA}         % Sepia background for draft mode
 
 % Define signature command for author identification
-\newcommand{\signature}[1]{\textsuperscript{\textsf{#1}}}
+\newcommand{\signature}[1]{{\scriptsize\textsf{#1}}}
 
 % Setup custom footnote style with alphabetic symbols in red
 \DeclareNewFootnote{A}[fnsymbol]
@@ -108,40 +116,39 @@
 
 % Fix hyperref compatibility with manyfoot and add backlink support
 \@ifpackageloaded{hyperref}{%
-    \renewcommand{\footnoteA}[1]{%
-        \stepcounter{footnoteA}%
+	\renewcommand{\footnoteA}[1]{%
+		\stepcounter{footnoteA}%
         \stepcounter{footnotebacklink}%
-        \protected@xdef\@thefnmark{\thefootnoteA}%
-        \hyper@makecurrent{footnoteA}%
+		\protected@xdef\@thefnmark{\thefootnoteA}%
+		\hyper@makecurrent{footnoteA}%
         % Create hypertarget at the point where footnote is called
         \edef\@currentbacklink{footnotebacklink.\thefootnotebacklink}%
         \hypertarget{\@currentbacklink}{}%
-        \@footnotemark%
+		\@footnotemark%
         % Add footnote text with clickable marker
         \begingroup
         \protected@xdef\@thefnmark{%
             \protect\hyperlink{\@currentbacklink}{\thefootnoteA}%
         }%
-        \@footnotetext{#1}%
+		\@footnotetext{#1}%
         \endgroup
-    }%
+	}%
 }{}
 
 % Command for footnote-style comments
 % Args: #1=author identifier, #2=color, #3=comment text
 \newcommand{\footnotecommentFragile}[3]{%
-    \ifthenelse{\boolean{isDraft}}%
-    {\protect{\color{#2}\footnoteA{\color{#2}\guillemotright#3\guillemotleft\signature{#1}}}}%
-    {}%
+	\ifthenelse{\boolean{isDraft}}%
+	{\protect{\color{#2}\footnoteA{\color{#2}\signature{#1}: \guillemotright#3\guillemotleft}}}%
+	{}%
 }
 \DeclareRobustCommand{\footnotecomment}[3]{\footnotecommentFragile{#1}{#2}{#3}}
 
-% Command for inline comments
+% Command for inline comments with highlighting
 % Args: #1=author identifier, #2=color, #3=comment text
 \newcommand{\inlinecommentFragile}[3]{%
-    \ifthenelse{\boolean{isDraft}}%
-    {{\noindent\small\leavevmode\color{#2}\guillemotright#3\guillemotleft\signature{#1}}}%
-    {\noindent\unskip}%
+	\ifthenelse{\boolean{isDraft}}%
+	{{\leavevmode\small\color{#2}\sethlcolor{#2!3!MySepia}\hl{[{\scriptsize\textsf{#1}}: #3]}}}{}%	
 }
 \DeclareRobustCommand{\inlinecomment}[3]{\inlinecommentFragile{#1}{#2}{#3}}
 
@@ -149,9 +156,9 @@
 % Command for added text with author attribution
 % Args: #1=author identifier, #2=color, #3=added text
 \newcommand{\addedFragile}[3]{{%
-            \ifthenelse{\boolean{isDraft}}
-            {\leavevmode\color{#2}#3\signature{#1}}
-            {#3}}%
+			\ifthenelse{\boolean{isDraft}}
+			{\leavevmode\color{#2}#3\signature{#1}}
+			{#3}}%
 }
 \DeclareRobustCommand{\added}[3]{\addedFragile{#1}{#2}{#3}}
 
@@ -168,66 +175,86 @@
 % Environment for colored text blocks with margin notes
 % Args: #1=color, #2=author identifier
 \newenvironment{colored}[2]
-{\ifhmode\par\fi\ifthenelse{\boolean{isDraft}}{\color{#1}\marginpar{\vspace*{\baselineskip}\signature{#2}}}{}}
+{\ifthenelse{\boolean{isDraft}}{\color{#1}\marginnote{\vspace*{-\baselineskip}\signature{#2}}}{}}
 {\ifthenelse{\boolean{isDraft}}{}{}}
+
+
 
 % Register a new author with associated commands
 % Args:
 % #1 (mandatory) = command identifier (e.g., alice for \alice commands)
-% [#2] (optional) = display name (defaults to first word in \author or empty; use "none" to hide signature)
+% [#2] (optional) = display name (defaults to first word in \author or empty)
 % [#3] (optional) = color name (defaults to cbRed)
 \NewDocumentCommand{\registerauthor}{m o o}{%
-    % Create author-specific variables to avoid overwrites
-    % Get author name - use optional arg if provided, else first author, else empty
-    % Special handling: if #2 is "none", set display name to empty
-    \IfNoValueTF{#2}
-    {\expandafter\def\csname displayname@#1\endcsname{\getfirstauthor}}
-    {\def\tempauthorname{#2}%
-        \def\tempnone{none}%
-        \ifx\tempauthorname\tempnone
-            \expandafter\def\csname displayname@#1\endcsname{}%
-        \else
-            \expandafter\def\csname displayname@#1\endcsname{#2}%
-        \fi}%
+	% Create author-specific variables to avoid overwrites
+	% Get author name - use optional arg if provided, else first author, else empty
+	\IfNoValueTF{#2}
+	{\expandafter\def\csname displayname@#1\endcsname{\getfirstauthor}}
+	{\expandafter\def\csname displayname@#1\endcsname{#2}}%
 
-    % Get color - use optional arg if provided, else cbRed
-    \IfNoValueTF{#3}
-    {\expandafter\def\csname authorcolor@#1\endcsname{cbRed}}
-    {\expandafter\def\csname authorcolor@#1\endcsname{#3}}%
+	% Get color - use optional arg if provided, else cbRed
+	\IfNoValueTF{#3}
+	{\expandafter\def\csname authorcolor@#1\endcsname{cbRed}}
+	{\expandafter\def\csname authorcolor@#1\endcsname{#3}}%
 
-    % Define color using author-specific color name
-    \expandafter\definecolor{color#1}{named}{\csname authorcolor@#1\endcsname}%
+	% Define color using author-specific color name
+	\expandafter\definecolor{color#1}{named}{\csname authorcolor@#1\endcsname}%
 
-    % Define commands using command identifier and author-specific display name
-    \expandafter\newcommand\csname #1i\endcsname[1]{%
-        \inlinecomment{\csname displayname@#1\endcsname}{color#1}{##1}}%
-    \expandafter\newcommand\csname #1f\endcsname[1]{%
-        \footnotecomment{\csname displayname@#1\endcsname}{color#1}{##1}}%
-    \expandafter\newcommand\csname #1\endcsname[1]{%
-        \added{\csname displayname@#1\endcsname}{color#1}{##1}}%
+	% Define commands using command identifier and author-specific display name
+	\expandafter\newcommand\csname #1i\endcsname[1]{%
+		\inlinecomment{\csname displayname@#1\endcsname}{color#1}{##1}}%
+	\expandafter\newcommand\csname #1f\endcsname[1]{%
+		\footnotecomment{\csname displayname@#1\endcsname}{color#1}{##1}}%
+	\expandafter\newcommand\csname #1\endcsname[1]{%
+		\added{\csname displayname@#1\endcsname}{color#1}{##1}}%
     \expandafter\newcommand\csname #1del\endcsname[1]{%
         \deleted{\csname displayname@#1\endcsname}{color#1}{##1}}%
-    \expandafter\newenvironment{#1env}{%
-        \begin{colored}{color#1}{\csname displayname@#1\endcsname}}%
-            {\end{colored}}%
+	\expandafter\newenvironment{#1env}{%
+		\begin{colored}{color#1}{\csname displayname@#1\endcsname}}%
+			{\end{colored}}%
 
-    % Add environment versions of inline and footnote comments
-    % We need to use \csname and \endcsname correctly with NewEnviron
-    \expandafter\newcommand\expandafter{\csname create#1ienv\endcsname}{%
-        \NewEnviron{#1ienv}{%
-            \ifthenelse{\boolean{isDraft}}%
-            {\noindent\small\leavevmode\color{color#1}\guillemotright\BODY\guillemotleft\signature{\csname displayname@#1\endcsname}}%
-            {}% In final mode, discard content
-        }[]%
-    }%
-    \csname create#1ienv\endcsname
+	% Add environment versions of inline and footnote comments
+	% We need to use \csname and \endcsname correctly with NewEnviron
+	\expandafter\newcommand\expandafter{\csname create#1ienv\endcsname}{%
+		\NewEnviron{#1ienv}{%
+			\ifthenelse{\boolean{isDraft}}%
+			{
+				\begin{mdframed}[linewidth=1.5pt,linecolor=color#1,topline=false,leftline=true,rightline=false,bottomline=false,backgroundcolor=color#1!3!MySepia]
+					\color{color#1}\marginnote{\vspace*{-\baselineskip}\signature{\csname displayname@#1\endcsname}}\noindent{\small\leavevmode\color{color#1}\BODY}
+				\end{mdframed}
+			}%
+			{}% In final mode, discard content
+		}[]%
+	}%
+	\csname create#1ienv\endcsname
 
-    \expandafter\newcommand\expandafter{\csname create#1fenv\endcsname}{%
-        \NewEnviron{#1fenv}{%
-            \ifthenelse{\boolean{isDraft}}%
-            {\footnoteA{\color{color#1}\guillemotright\BODY\guillemotleft\signature{\csname displayname@#1\endcsname}}}%
-            {}% In final mode, discard content
-        }[]%
-    }%
-    \csname create#1fenv\endcsname
+	\expandafter\newcommand\expandafter{\csname create#1fenv\endcsname}{%
+		\NewEnviron{#1fenv}{%
+			\ifthenelse{\boolean{isDraft}}%
+			{\footnoteA{\color{color#1}\guillemotright\BODY\guillemotleft\signature{\csname displayname@#1\endcsname}}}%
+			{}% In final mode, discard content
+		}[]%
+	}%
+	\csname create#1fenv\endcsname
 }
+
+
+% todolist environment for tracking tasks
+\RequirePackage{amssymb}
+\RequirePackage{enumitem}
+\newlist{todolist}{itemize}{2}
+\setlist[todolist]{label=$\square$}
+\RequirePackage{pifont}
+\newcommand{\done}{\rlap{\raisebox{0.2ex}{\hspace{0.3ex}{\scriptsize \ding{56}}}}$\square$}
+\newcommand{\doing}{\rlap{\raisebox{0.2ex}{\hspace{0.5ex}$\cdot$}}$\square$}
+
+\registerauthor{todo}[TODO][cbRed]
+
+\RequirePackage{ifdraft}
+\ifdraft{
+	\RequirePackage{pagecolor}
+	\pagecolor{MySepia}
+	\color{black}
+	\hbadness=99999  % or any number >=10000
+	\vbadness=99999  % or any number >=10000
+}{}
