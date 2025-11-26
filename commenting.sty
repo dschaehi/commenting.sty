@@ -241,7 +241,7 @@
     \leavevmode{%
       \small\color{#2}%
       \sethlcolor{#2!10!\bgColor}%
-      \hl{\mbox{\signature{#1}}: \small#3}%
+      \hl{\mbox{\scriptsize\signature{#1}}: \small#3}%
     }%
   }{}%
 }
@@ -284,7 +284,7 @@
 \newenvironment{colored}[2]{%
   \ifthenelse{\boolean{isDraft}}{%
     \color{#1}%
-    \marginnote{\vspace*{-\baselineskip}\signature{#2}}%
+    \marginnote{\vspace*{-\baselineskip}\scriptsize\signature{#2}}%
   }{}%
 }{%
   % No special cleanup needed
@@ -377,7 +377,7 @@
           backgroundcolor=color#1!10!\bgColor%
         ]
           \color{color#1}%
-          \marginnote{\vspace*{-\baselineskip}\signature{\csname displayname@#1\endcsname}}%
+          \marginnote{\vspace*{-\baselineskip}\scriptsize\signature{\csname displayname@#1\endcsname}}%
           \noindent\small\BODY
         \end{mdframed}%
       }{}%
